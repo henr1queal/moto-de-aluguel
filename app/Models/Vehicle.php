@@ -9,7 +9,23 @@ class Vehicle extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['brand', 'model', 'year', 'license_plate'];
+    protected $fillable = [
+        'brand',
+        'model',
+        'year',
+        'license_plate',
+        'renavam',
+        'actual_km',
+        'revision_period',
+        'oil_period',
+        'protection_value',
+        'user_id'
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function rentals()
     {
