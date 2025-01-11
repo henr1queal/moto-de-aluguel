@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('rentals', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('landlord_name');
             $table->string('landlord_cpf');
             $table->string('driver_license_number');
@@ -34,7 +34,7 @@ return new class extends Migration
             $table->string('house_number')->nullable();
             $table->string('complement')->nullable();
             $table->string('photo');
-            $table->foreignId('vehicle_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('vehicle_id')->constrained()->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });

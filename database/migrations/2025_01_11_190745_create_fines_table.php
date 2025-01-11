@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('fines', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->date('date');
             $table->decimal('cost', 10, 2);
             $table->boolean('paid')->default(0);
             $table->text('observation');
-            $table->foreignId('vehicle_id')->constrained()->onDelete('cascade');
-            $table->foreignId('rental_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('vehicle_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('rental_id')->constrained()->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });
