@@ -13,9 +13,14 @@ return new class extends Migration
     {
         Schema::create('oil_changes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('vehicle_id')->constrained()->onDelete('cascade');
             $table->decimal('cost', 10, 2);
+            $table->integer('actual_km');
             $table->date('date');
+            $table->text('observation');
+            $table->foreignUuid('vehicle_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('location_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('revision_id')->nullable()->constrained()->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
