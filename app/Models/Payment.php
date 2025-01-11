@@ -9,7 +9,13 @@ class Payment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['rental_id', 'amount', 'payment_date'];
+    protected $fillable = [
+        'paid',
+        'cost',
+        'payment_date',
+        'observation',
+        'rental_id',
+    ];
 
     public function rental()
     {
