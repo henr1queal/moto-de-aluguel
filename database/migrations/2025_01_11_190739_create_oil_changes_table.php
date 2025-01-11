@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('observation');
             $table->foreignUuid('vehicle_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('rental_id')->constrained()->onDelete('cascade');
-            $table->foreignUuid('revision_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignUuid('maintenance_id')->nullable()->constrained()->onDelete('cascade');
             $table->softDeletes();
             $table->timestamps();
         });
