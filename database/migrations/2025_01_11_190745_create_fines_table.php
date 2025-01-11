@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('fines', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('vehicle_id')->constrained()->onDelete('cascade');
-            $table->string('description');
-            $table->decimal('amount', 10, 2);
             $table->date('date');
+            $table->decimal('cost', 10, 2);
+            $table->boolean('paid')->default(0);
+            $table->text('observation');
+            $table->foreignId('vehicle_id')->constrained()->onDelete('cascade');
+            $table->foreignId('rental_id')->constrained()->onDelete('cascade');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
