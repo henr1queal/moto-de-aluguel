@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('actual_km');
             $table->string('observation');
             $table->foreignUuid('vehicle_id')->constrained()->onDelete('cascade');
-            $table->foreignUuid('location_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('rental_id')->constrained()->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });
