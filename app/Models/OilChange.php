@@ -9,7 +9,25 @@ class OilChange extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['vehicle_id', 'cost', 'date'];
+    protected $fillable = [
+        'cost',
+        'actual_km',
+        'date',
+        'observation',
+        'vehicle_id',
+        'rental_id',
+        'maintenance_id'
+    ];
+
+    public function maintenance()
+    {
+        return $this->belongsTo(Maintenance::class);
+    }
+
+    public function rental()
+    {
+        return $this->belongsTo(Rental::class);
+    }
 
     public function vehicle()
     {
