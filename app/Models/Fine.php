@@ -9,7 +9,14 @@ class Fine extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['vehicle_id', 'description', 'amount', 'date'];
+    protected $fillable = [
+        'date',
+        'cost',
+        'paid',
+        'observation',
+        'vehicle_id',
+        'rental_id'
+    ];
 
     public function vehicle()
     {
