@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('maintenances', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('vehicle_id')->constrained()->onDelete('cascade');
-            $table->string('description');
             $table->decimal('cost', 10, 2);
             $table->date('date');
+            $table->integer('actual_km');
+            $table->string('observation');
+            $table->foreignUuid('vehicle_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('location_id')->constrained()->onDelete('cascade');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
