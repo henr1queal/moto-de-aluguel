@@ -22,8 +22,9 @@ return new class extends Migration
             $table->integer('revision_period', false, true);
             $table->integer('oil_period', false, true);
             $table->decimal('protection_value');
-            $table->uuid('user_id');
+            $table->foreignUuid('user_id')->constrained();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
