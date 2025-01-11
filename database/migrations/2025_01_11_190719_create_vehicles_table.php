@@ -13,10 +13,16 @@ return new class extends Migration
     {
         Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
-            $table->string('brand');
-            $table->string('model');
+            $table->string('brand', 20);
+            $table->string('model', 20);
             $table->year('year');
-            $table->string('license_plate')->unique();
+            $table->string('license_plate', 8)->unique();
+            $table->string('renavam', 11)->unique();
+            $table->integer('actual_km', false, true)->default(0);
+            $table->integer('revision_period', false, true);
+            $table->integer('oil_period', false, true);
+            $table->decimal('protection_value');
+            $table->uuid('user_id');
             $table->timestamps();
         });
     }
