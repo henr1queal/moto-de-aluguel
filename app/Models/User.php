@@ -8,10 +8,26 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+
+    protected $keyType = 'string'; // Indica que a chave primária é uma string.
+    public $incrementing = false; // Desativa o autoincremento.
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Gera UUID automaticamente ao criar um novo registro
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = Str::uuid();
+            }
+        });
+    }
 
     /**
      * The attributes that are mass assignable.
