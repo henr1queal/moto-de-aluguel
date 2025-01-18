@@ -23,7 +23,7 @@
                 <h1 style="font-size: 20px;">Minhas locações</h1>
             </div>
         </div>
-        <div class="row g-0 mt-4 g-3">
+        <div class="row mt-4 g-3">
             <div class="col-6 d-flex pb-4">
                 <a href="{{ route('profile.edit') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
