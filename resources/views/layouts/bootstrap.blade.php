@@ -16,9 +16,15 @@
             background-color: #242424;
             color: #FFFFFF;
             font-family: "Roboto", serif;
-            height: 92dvh;
-            padding-top: 30px;
         }
+        
+        .content {
+            height: 90dvh;
+            padding-top: 30px;
+            overflow-y: auto;
+            margin-bottom: 2dvh;
+        }
+
         .menu {
             height: 8dvh;
             background-color: #1f1f1f;
@@ -31,7 +37,9 @@
 </head>
 
 <body>
-    @yield('content')
+    <div class="content">
+        @yield('content')
+    </div>
     <div class="menu bottom-0 rounded-top-5 pt-1">
         <div class="row g-0 justify-content-evenly align-items-center h-100">
             <div class="col-auto">
