@@ -45,7 +45,7 @@
                 </a>
             </div>
             <div class="col-auto">
-                <a href="{{ route('dashboard') }}" class="row g-2 text-decoration-none text-white">
+                <a href="{{ route('home') }}" class="row g-2 text-decoration-none text-white">
                     <div class="col-12 text-center">
                         <img src="{{ asset('assets/svg/bike.svg') }}" alt="" class="img-fluid">
                     </div>
@@ -55,7 +55,7 @@
                 </a>
             </div>
             <div class="col-auto">
-                <a href="{{ route('dashboard') }}" class="row g-2 text-decoration-none text-white">
+                <a href="{{ route('home') }}" class="row g-2 text-decoration-none text-white">
                     <div class="col-12 text-center">
                         <img src="{{ asset('assets/svg/book.svg') }}" alt="" class="img-fluid">
                     </div>
@@ -65,7 +65,7 @@
                 </a>
             </div>
             <div class="col-auto">
-                <a href="{{ route('dashboard') }}" class="row g-2 text-decoration-none text-white">
+                <a href="{{ route('home') }}" class="row g-2 text-decoration-none text-white">
                     <div class="col-12 text-center">
                         <img src="{{ asset('assets/svg/notification.svg') }}" alt="" class="img-fluid">
                     </div>
