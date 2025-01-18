@@ -22,10 +22,16 @@ Route::get('/home', function () {
     return view('start.page');
 })->middleware(['auth', 'verified'])->name('home');
 
+Route::get('/locacoes', function () {
+    return view('rental.home');
+})->middleware(['auth', 'verified'])->name('rental-home');
+
+Route::view('/locacoes/nova', 'rental.new')->middleware(['auth', 'verified'])->name('rental-new');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
