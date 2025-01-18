@@ -35,7 +35,7 @@
     <div class="menu bottom-0 rounded-top-5 pt-1">
         <div class="row g-0 justify-content-evenly align-items-center h-100">
             <div class="col-auto">
-                <a href="{{ route('dashboard') }}" class="row g-2 text-decoration-none text-white">
+                <a href="{{ route('home') }}" class="row g-2 text-decoration-none text-white">
                     <div class="col-12 text-center">
                         <img src="{{ asset('assets/svg/home.svg') }}" alt="" class="img-fluid">
                     </div>
