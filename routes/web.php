@@ -31,6 +31,7 @@ Route::view('/locacoes/adicionar', 'rental.new')->middleware(['auth', 'verified'
 
 Route::view('/veiculos/adicionar', 'vehicle.new')->middleware(['auth', 'verified'])->name('vehicle-new');
 Route::get('/veiculos', [VehicleController::class, 'index'])->middleware(['auth', 'verified'])->name('vehicle-home');
+Route::get('/veiculos/{vehicle}', [VehicleController::class, 'show'])->middleware(['auth', 'verified'])->name('vehicle-show');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

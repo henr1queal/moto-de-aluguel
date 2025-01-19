@@ -43,7 +43,7 @@
             @else
                 @foreach ($myVehicles as $vehicle)
                     <div class="col-6 mb-4">
-                        <a href="{{ route('profile.edit') }}" class="text-decoration-none text-white">
+                        <a href="{{ route('vehicle-show', ['vehicle' => $vehicle->id]) }}" class="text-decoration-none text-white">
                             <div class="vehicle rounded-4 text-center pt-2 pb-5 position-relative">
                                 <small>{{ $vehicle->brand }}</small>
                                 <br><small>{{ $vehicle->model }}</small>

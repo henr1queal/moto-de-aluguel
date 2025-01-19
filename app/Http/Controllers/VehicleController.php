@@ -14,6 +14,7 @@ class VehicleController extends Controller
     {
         $authUserId = Auth()->user()->id;
         $myVehicles = Vehicle::myVehicles()->select([
+            'id',
             'brand',
             'model',
             'year',
@@ -42,7 +43,7 @@ class VehicleController extends Controller
      */
     public function show(Vehicle $vehicle)
     {
-        //
+        return view('vehicle.show', compact('vehicle'));
     }
 
     /**
