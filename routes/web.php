@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,7 +28,9 @@ Route::get('/locacoes', function () {
 })->middleware(['auth', 'verified'])->name('rental-home');
 
 Route::view('/locacoes/adicionar', 'rental.new')->middleware(['auth', 'verified'])->name('rental-new');
+
 Route::view('/veiculos/adicionar', 'vehicle.new')->middleware(['auth', 'verified'])->name('vehicle-new');
+Route::get('/veiculos', [VehicleController::class, 'index'])->middleware(['auth', 'verified'])->name('vehicle-home');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -12,7 +12,13 @@ class VehicleController extends Controller
      */
     public function index()
     {
-        //
+        $authUserId = Auth()->user()->id;
+        $myVehicles = Vehicle::myVehicles()->select([
+            'brand',
+            'model',
+            'year',
+            'license_plate'])->get();
+        return view('vehicle.home', compact('myVehicles'));
     }
 
     /**
