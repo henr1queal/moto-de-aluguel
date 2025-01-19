@@ -12,7 +12,7 @@
 
         .content {
             height: 85dvh;
-            margin-bottom: 0;
+            margin-bottom: 10px;
         }
     </style>
 @endsection

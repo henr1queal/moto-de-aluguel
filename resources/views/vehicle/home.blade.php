@@ -24,7 +24,7 @@
 
         .content {
             height: 85dvh;
-            margin-bottom: 0;
+            margin-bottom: 10px;
         }
     </style>
 @endsection
@@ -35,7 +35,7 @@
                 <h1 style="font-size: 20px;">Minhas motos</h1>
             </div>
         </div>
-        <div class="row mt-4 g-3">
+        <div class="row mt-4 g-3 mb-3">
             @if ($myVehicles->count() === 0)
                 <div class="col-12 text-center">
                     <span class="text-secondary">Adicione um veículo para vê-lo aqui.</span>
