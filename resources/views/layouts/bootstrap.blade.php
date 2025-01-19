@@ -12,10 +12,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
     <style>
+        input, select{
+            color: #FFFFFF !important;
+        }
         body {
             background-color: #242424;
-            color: #FFFFFF;
             font-family: "Roboto", serif;
+            color: #FFFFFF;
         }
 
         .content {
@@ -88,6 +91,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
     </script>
+    @yield('scripts')
 </body>
 
 </html>
