@@ -150,68 +150,35 @@
                         <div class="col mt-0">
                             <div id="carouselExample" class="carousel slide">
                                 <div class="carousel-inner">
-                                    <div class="carousel-item active">
-                                        <div class="row g-2">
-                                            <div class="col text-center">
-                                                <div class="vehicle rounded-3 py-2">
-                                                    <input type="radio" name="vehicle_id" value="1234">
-                                                    <br><small>CG HONDA 160</small>
-                                                    <br><small>SAE-2H75</small>
-                                                    <br><small>KM: 32757</small>
-                                                    <br><small>ANO: 2022</small>
+                                    <div id="carouselExample" class="carousel slide">
+                                        <div class="carousel-inner">
+                                            @foreach ($myVehicles as $vehicle)
+                                                {{-- Início de um novo grupo --}}
+                                                @if ($loop->first || ($loop->iteration - 1) % 3 === 0)
+                                                    <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                                                        <div class="row g-2">
+                                                @endif
+                                    
+                                                {{-- Veículo individual --}}
+                                                <div class="col-4 text-center">
+                                                    <div class="vehicle rounded-3 py-2">
+                                                        <input type="radio" name="vehicle_id" value="{{ $vehicle->id }}">
+                                                        <br><small>{{ $vehicle->brand }} {{ $vehicle->model }}</small>
+                                                        <br><small>{{ $vehicle->license_plate }}</small>
+                                                        <br><small>KM: {{ $vehicle->actual_km }}</small>
+                                                        <br><small>ANO: {{ $vehicle->year }}</small>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col text-center">
-                                                <div class="vehicle rounded-3 py-2">
-                                                    <input type="radio" name="vehicle_id" value="1234">
-                                                    <br><small>CG HONDA 160</small>
-                                                    <br><small>SAE-2H75</small>
-                                                    <br><small>KM: 32757</small>
-                                                    <br><small>ANO: 2022</small>
-                                                </div>
-                                            </div>
-                                            <div class="col text-center">
-                                                <div class="vehicle rounded-3 py-2">
-                                                    <input type="radio" name="vehicle_id" value="1234">
-                                                    <br><small>CG HONDA 160</small>
-                                                    <br><small>SAE-2H75</small>
-                                                    <br><small>KM: 32757</small>
-                                                    <br><small>ANO: 2022</small>
-                                                </div>
-                                            </div>
+                                    
+                                                {{-- Fim do grupo ou último item --}}
+                                                @if ($loop->iteration % 3 === 0 || $loop->last)
+                                                        </div> {{-- Fecha .row --}}
+                                                    </div> {{-- Fecha .carousel-item --}}
+                                                @endif
+                                            @endforeach
                                         </div>
                                     </div>
-                                    <div class="carousel-item">
-                                        <div class="row g-2">
-                                            <div class="col text-center">
-                                                <div class="vehicle rounded-3 py-2">
-                                                    <input type="radio" name="vehicle_id" value="1234">
-                                                    <br><small>CG HONDA 160</small>
-                                                    <br><small>SAE-2H75</small>
-                                                    <br><small>KM: 32757</small>
-                                                    <br><small>ANO: 2022</small>
-                                                </div>
-                                            </div>
-                                            <div class="col text-center">
-                                                <div class="vehicle rounded-3 py-2">
-                                                    <input type="radio" name="vehicle_id" value="1234">
-                                                    <br><small>CG HONDA 160</small>
-                                                    <br><small>SAE-2H75</small>
-                                                    <br><small>KM: 32757</small>
-                                                    <br><small>ANO: 2022</small>
-                                                </div>
-                                            </div>
-                                            <div class="col text-center">
-                                                <div class="vehicle rounded-3 py-2">
-                                                    <input type="radio" name="vehicle_id" value="1234">
-                                                    <br><small>CG HONDA 160</small>
-                                                    <br><small>SAE-2H75</small>
-                                                    <br><small>KM: 32757</small>
-                                                    <br><small>ANO: 2022</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    
                                 </div>
                             </div>
                             <div class="d-flex justify-content-end mt-2">

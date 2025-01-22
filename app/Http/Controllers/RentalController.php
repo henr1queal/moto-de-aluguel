@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Rental;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
 
 class RentalController extends Controller
@@ -12,6 +13,8 @@ class RentalController extends Controller
      */
     public function index()
     {
+        $myRentals = Auth()->user()->rentals;
+        return view('rental.index', compact('myRentals'));
         //
     }
 
@@ -20,7 +23,11 @@ class RentalController extends Controller
      */
     public function create()
     {
-        //
+        $myVehicles = Vehicle::where('user_id', Auth()->user()->id)->get();
+        if($myVehicles->count() === 0) {
+            return redirect()->back()->with('error', 'Você precisa ter veículos cadastrados.');
+        }
+        return view('rental.new', compact('myVehicles'));
     }
 
     /**
