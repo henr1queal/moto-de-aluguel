@@ -29,6 +29,34 @@
     </style>
 @endsection
 @section('content')
+    @if (session('success') || session('error'))
+        <div class="toast-container position-fixed end-0 p-3" style="z-index: 1055; bottom: 10%;">
+            @if (session('success'))
+                <div id="success" class="toast align-items-center text-bg-success border-0" role="alert"
+                    aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="2500">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            {{ session('success') }}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                            aria-label="Close"></button>
+                    </div>
+                </div>
+            @endif
+            @if (session('error'))
+                <div id="error" class="toast align-items-center text-bg-danger border-0" role="alert"
+                    aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="2500">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            {{ session('error') }}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                            aria-label="Close"></button>
+                    </div>
+                </div>
+            @endif
+        </div>
+    @endif
     <div class="container">
         <div class="row g-0">
             <div class="col text-center">
@@ -43,7 +71,8 @@
             @else
                 @foreach ($myVehicles as $vehicle)
                     <div class="col-6 mb-4">
-                        <a href="{{ route('vehicle.show', ['vehicle' => $vehicle->id]) }}" class="text-decoration-none text-white">
+                        <a href="{{ route('vehicle.show', ['vehicle' => $vehicle->id]) }}"
+                            class="text-decoration-none text-white">
                             <div class="vehicle rounded-4 text-center pt-2 pb-5 position-relative">
                                 <small>{{ $vehicle->brand }}</small>
                                 <br><small>{{ $vehicle->model }}</small>
@@ -70,4 +99,20 @@
             <strong>+</strong>
         </a>
     </div>
+@endsection
+@section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toastElements = document.querySelectorAll('.toast');
+            toastElements.forEach(toastElement => {
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
+            });
+
+            disableSubmit = () => {
+                const submitButton = document.getElementById('submit');
+                submitButton.disabled = true;
+            }
+        });
+    </script>
 @endsection

@@ -15,49 +15,99 @@
         </div>
         <div class="row mt-4 g-3">
             <div class="col mt-0">
-                <form>
+                <form action="{{ route('vehicle.store') }}" method="POST" onsubmit="disableSubmit()">
+                    @csrf
                     <div class="mt-4"><small><strong>Dados sobre o veículo:</strong></small></div>
                     <div class="row g-3 mt-3">
                         <div class="col mt-0">
                             <label for="brand" class="form-label fw-light">Marca<span
                                     class="text-danger"><strong>*</strong></span></label>
-                            <input type="text" class="form-control bg-transparent" id="brand" name="brand">
+                            @error('brand')
+                                <input type="text" class="form-control bg-transparent border-danger" id="brand"
+                                    value="{{ old('brand') }}" name="brand" required>
+                                <small class="very-small text-danger">Digite uma marca válida.</small>
+                            @else
+                                <input type="text" class="form-control bg-transparent" id="brand"
+                                    value="{{ old('brand') }}" name="brand" required>
+                            @enderror
                         </div>
                         <div class="col mt-0">
                             <label for="model" class="form-label fw-light">Modelo<span
                                     class="text-danger"><strong>*</strong></span></label>
-                            <input type="text" class="form-control bg-transparent" id="model" name="model">
+                            @error('model')
+                                <input type="text" class="form-control bg-transparent border-danger" id="model"
+                                    value="{{ old('model') }}" name="model" required>
+                                <small class="very-small text-danger">Digite um modelo válido.</small>
+                            @else
+                                <input type="text" class="form-control bg-transparent" id="model"
+                                    value="{{ old('model') }}" name="model" required>
+                            @enderror
                         </div>
                     </div>
                     <div class="row g-3 mt-3">
                         <div class="col mt-0">
                             <label for="license_plate" class="form-label fw-light">Placa<span
                                     class="text-danger"><strong>*</strong></span></label>
-                            <input type="text" class="form-control bg-transparent" id="license_plate"
-                                name="license_plate">
+                            @error('license_plate')
+                                <input type="text" class="form-control bg-transparent border-danger" id="license_plate"
+                                    value="{{ old('license_plate') }}" name="license_plate" maxlength="8" required>
+                                <small class="very-small text-danger">Exemplo: AAA-2H99 ou AAA-1234</small>
+                            @else
+                                <input type="text" class="form-control bg-transparent" id="license_plate"
+                                    value="{{ old('license_plate') }}" name="license_plate" maxlength="8" required>
+                            @enderror
                         </div>
                         <div class="col mt-0">
                             <label for="renavam" class="form-label fw-light">Renavam<span
                                     class="text-danger"><strong>*</strong></span></label>
-                            <input type="text" class="form-control bg-transparent" id="renavam" name="renavam">
+                            @error('renavam')
+                                <input type="text" class="form-control bg-transparent border-danger" id="renavam"
+                                    value="{{ old('renavam') }}" name="renavam" required>
+                                <small class="very-small text-danger">Apenas números.</small>
+                            @else
+                                <input type="text" class="form-control bg-transparent" id="renavam"
+                                    value="{{ old('renavam') }}" name="renavam" required>
+                            @enderror
                         </div>
                     </div>
                     <div class="row g-3 mt-3">
                         <div class="col mt-0">
                             <label for="year" class="form-label fw-light">Ano modelo<span
                                     class="text-danger"><strong>*</strong></span></label>
-                            <input type="text" class="form-control bg-transparent" id="year" name="year">
+                            @error('year')
+                                <input type="text" class="form-control bg-transparent border-danger" id="year"
+                                    value="{{ old('year') }}" name="year" maxlength="4" required>
+                                <small class="very-small text-danger">Apenas números.</small>
+                            @else
+                                <input type="text" class="form-control bg-transparent" id="year"
+                                    value="{{ old('year') }}" name="year" maxlength="4" required>
+                            @enderror
                         </div>
                         <div class="col mt-0">
                             <label for="actual_km" class="form-label fw-light">KM Atual<span
                                     class="text-danger"><strong>*</strong></span></label>
-                            <input type="text" class="form-control bg-transparent" id="actual_km" name="oil_period">
+                            @error('actual_km')
+                                <input type="text" class="form-control bg-transparent border-danger" id="actual_km"
+                                    value="{{ old('actual_km') }}" name="actual_km" required>
+                                <small class="very-small text-danger">Apenas números.</small>
+                            @else
+                                <input type="text" class="form-control bg-transparent" id="actual_km"
+                                    value="{{ old('actual_km') }}" name="actual_km" required>
+                            @enderror
                         </div>
                         <div class="col mt-0">
                             <label for="protection_value" class="form-label fw-light">Valor seguro<span
                                     class="text-danger"><strong>*</strong></span></label>
-                            <input type="text" class="form-control bg-transparent" id="protection_value"
-                                name="oil_period">
+                            @error('protection_value')
+                                <input type="text" class="form-control bg-transparent border-danger" id="protection_value"
+                                    value="{{ old('protection_value') }}" name="protection_value" required>
+                                <div id="emailHelp" class="form-text text-secondary">R$</div>
+                                <small class="very-small text-danger">Apenas números.</small>
+                            @else
+                                <input type="text" class="form-control bg-transparent" id="protection_value"
+                                    value="{{ old('protection_value') }}" name="protection_value" required>
+                                <div id="emailHelp" class="form-text text-secondary">R$</div>
+                            @enderror
                         </div>
                     </div>
                     <div class="mt-4"><small><strong>Manutenções e revisões:</strong></small></div>
@@ -65,33 +115,38 @@
                         <div class="col mt-0">
                             <label for="revision_period" class="form-label fw-light">Período de revisão<span
                                     class="text-danger"><strong>*</strong></span></label>
-                            <input type="text" class="form-control bg-transparent" id="revision_period"
-                                name="revision_period">
-                            <div id="emailHelp" class="form-text text-secondary">Quilômetros</div>
+                            @error('revision_period')
+                                <input type="text" class="form-control bg-transparent border-danger" id="revision_period"
+                                    value="{{ old('revision_period') }}" name="revision_period" required>
+                                <div id="emailHelp" class="form-text text-secondary">Quilômetros</div>
+                                <small class="very-small text-danger">Apenas números.</small>
+                            @else
+                                <input type="text" class="form-control bg-transparent" id="revision_period"
+                                    value="{{ old('revision_period') }}" name="revision_period" required>
+                                <div id="emailHelp" class="form-text text-secondary">Quilômetros</div>
+                            @enderror
                         </div>
                         <div class="col mt-0">
                             <label for="oil_period" class="form-label fw-light">Período troca de óleo<span
                                     class="text-danger"><strong>*</strong></span></label>
-                            <input type="text" class="form-control bg-transparent" id="oil_period" name="oil_period">
-                            <div id="emailHelp" class="form-text text-secondary">Quilômetros</div>
-                        </div>
-                    </div>
-                    <div class="mt-4"><small><strong>Valores a serem cobrados:</strong></small></div>
-                    <div class="row g-3 mt-3">
-                        <div class="col mt-0">
-                            <label for="cost" class="form-label fw-light">Valor semanal<span
-                                    class="text-danger"><strong>*</strong></span></label>
-                            <input type="text" class="form-control bg-transparent" id="cost" name="cost">
-                        </div>
-                        <div class="col mt-0">
-                            <label for="deposit" class="form-label fw-light">Caução<span
-                                    class="text-danger"><strong>*</strong></span></label>
-                            <input type="text" class="form-control bg-transparent" id="deposit" name="deposit">
+                            @error('oil_period')
+                                <input type="text" class="form-control bg-transparent border-danger" id="oil_period"
+                                    value="{{ old('oil_period') }}" name="oil_period" required>
+                                <div id="emailHelp" class="form-text text-secondary">Quilômetros</div>
+                                <small class="very-small text-danger">Apenas números.</small>
+                            @else
+                                <input type="text" class="form-control bg-transparent" id="oil_period"
+                                    value="{{ old('oil_period') }}" name="oil_period" required>
+                                <div id="emailHelp" class="form-text text-secondary">Quilômetros</div>
+                            @enderror
                         </div>
                     </div>
                     <div class="row g-3 mt-5 mb-5">
                         <div class="col mt-0 text-center">
-                            <input type="submit" value="Adicionar" class="btn btn-success btn-lg">
+                            <button type="submit" class="btn btn-success btn-lg" id="submit"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy me-1" viewBox="0 0 16 16">
+                                <path d="M11 2H9v3h2z"/>
+                                <path d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m3 4a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1H4zM3 15h10v-4.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5z"/>
+                              </svg> Adicionar</button>
                         </div>
                     </div>
                 </form>
@@ -102,54 +157,16 @@
 @section('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const zipCodeInput = document.getElementById('zip_code');
-            const streetInput = document.getElementById('street');
-            const stateSelect = document.getElementById('state');
-            const cityInput = document.getElementById('city');
-            const neighborhoodInput = document.getElementById('neighborhood');
-            const complementInput = document.getElementById('complement');
-
-            zipCodeInput.addEventListener('input', function() {
-                const zipCode = zipCodeInput.value.replace(/\D/g, ''); // Remove caracteres não numéricos
-
-                if (zipCode.length === 8) {
-                    // Realiza a busca do endereço na API ViaCEP
-                    fetch(`https://viacep.com.br/ws/${zipCode}/json/`)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Erro ao buscar o CEP');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.erro) {
-                                alert('CEP não encontrado');
-                                return;
-                            }
-
-                            // Preenche os campos com os dados retornados
-                            streetInput.value = data.logradouro || '';
-                            stateSelect.value = data.uf || '';
-                            cityInput.value = data.localidade || '';
-                            neighborhoodInput.value = data.bairro || '';
-                            complementInput.value = data.complemento || '';
-                        })
-                        .catch(error => {
-                            console.error('Erro:', error);
-                            alert('Não foi possível buscar o CEP.');
-                        });
-                }
+            const toastElements = document.querySelectorAll('.toast');
+            toastElements.forEach(toastElement => {
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
             });
 
-            document.querySelectorAll('.vehicle').forEach(vehicle => {
-                vehicle.addEventListener('click', () => {
-                    const input = vehicle.querySelector('input[name="vehicle_id"]');
-                    if (input) {
-                        input.checked = true;
-                    }
-                });
-            });
-
+            disableSubmit = () => {
+                const submitButton = document.getElementById('submit');
+                submitButton.disabled = true;
+            }
         });
     </script>
 @endsection
