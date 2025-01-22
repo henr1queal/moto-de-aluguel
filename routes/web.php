@@ -25,13 +25,15 @@ Route::get('/home', function () {
 
 Route::get('/locacoes', function () {
     return view('rental.home');
-})->middleware(['auth', 'verified'])->name('rental-home');
+})->middleware(['auth', 'verified'])->name('rental.home');
 
-Route::view('/locacoes/adicionar', 'rental.new')->middleware(['auth', 'verified'])->name('rental-new');
+Route::view('/locacoes/adicionar', 'rental.new')->middleware(['auth', 'verified'])->name('rental.new');
 
-Route::view('/veiculos/adicionar', 'vehicle.new')->middleware(['auth', 'verified'])->name('vehicle-new');
-Route::get('/veiculos', [VehicleController::class, 'index'])->middleware(['auth', 'verified'])->name('vehicle-home');
-Route::get('/veiculos/{vehicle}', [VehicleController::class, 'show'])->middleware(['auth', 'verified'])->name('vehicle-show');
+Route::view('/veiculos/adicionar', 'vehicle.new')->middleware(['auth', 'verified'])->name('vehicle.new');
+Route::get('/veiculos', [VehicleController::class, 'index'])->middleware(['auth', 'verified'])->name('vehicle.home');
+Route::post('/veiculos', [VehicleController::class, 'store'])->name('vehicle.store');
+Route::get('/veiculos/{vehicle}', [VehicleController::class, 'show'])->middleware(['auth', 'verified'])->name('vehicle.show');
+Route::patch('/veiculos/{vehicle}', [VehicleController::class, 'update'])->name('vehicle.update');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
