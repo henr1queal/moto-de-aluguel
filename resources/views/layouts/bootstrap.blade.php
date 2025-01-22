@@ -57,7 +57,7 @@
                 </a>
             </div>
             <div class="col-auto">
-                <a href="{{ route('vehicle.home') }}" class="row g-2 text-decoration-none text-white">
+                <a href="{{ route('vehicle.index') }}" class="row g-2 text-decoration-none text-white">
                     <div class="col-12 text-center">
                         <img src="{{ asset('assets/svg/bike.svg') }}" alt="" class="img-fluid">
                     </div>

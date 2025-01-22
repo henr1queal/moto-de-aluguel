@@ -15,7 +15,7 @@
         </div>
         <div class="row g-0 mt-4 g-3">
             <div class="col-6 d-flex">
-                <a href="{{ route('vehicle.home') }}"
+                <a href="{{ route('vehicle.index') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                     <div class="row g-0">
                         <div class="pt-3 pb-2 px-4 text-center">

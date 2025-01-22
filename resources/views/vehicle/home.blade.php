@@ -43,7 +43,7 @@
             @else
                 @foreach ($myVehicles as $vehicle)
                     <div class="col-6 mb-4">
-                        <a href="{{ route('vehicle-show', ['vehicle' => $vehicle->id]) }}" class="text-decoration-none text-white">
+                        <a href="{{ route('vehicle.show', ['vehicle' => $vehicle->id]) }}" class="text-decoration-none text-white">
                             <div class="vehicle rounded-4 text-center pt-2 pb-5 position-relative">
                                 <small>{{ $vehicle->brand }}</small>
                                 <br><small>{{ $vehicle->model }}</small>
@@ -66,7 +66,7 @@
 @endsection
 @section('options-button')
     <div class="container text-end pe-4">
-        <a href="{{ route('vehicle-new') }}" class="btn btn-light fs-1 py-0 rounded-3 text-decoration-none">
+        <a href="{{ route('vehicle.new') }}" class="btn btn-light fs-1 py-0 rounded-3 text-decoration-none">
             <strong>+</strong>
         </a>
     </div>
