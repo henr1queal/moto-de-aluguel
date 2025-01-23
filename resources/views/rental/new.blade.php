@@ -27,11 +27,11 @@
                                 class="text-danger"><strong>*</strong></span></label>
                         @error('landlord_name')
                             <input type="text" class="form-control bg-transparent border-danger" id="landlord_name"
-                                value="{{ old('landlord_name') ?? null }}" name="landlord_name">
+                                value="{{ old('landlord_name') ?? null }}" required name="landlord_name">
                             <small class="very-small text-danger">Digite o nome</small>
                         @else
                             <input type="text" class="form-control bg-transparent" id="landlord_name"
-                                value="{{ old('landlord_name') ?? null }}" name="landlord_name">
+                                value="{{ old('landlord_name') ?? null }}" required name="landlord_name">
                         @enderror
 
                     </div>
@@ -41,11 +41,11 @@
                                     class="text-danger"><strong>*</strong></span></label>
                             @error('landlord_cpf')
                                 <input type="text" class="form-control bg-transparent border-danger" id="landlord_cpf"
-                                    value="{{ old('landlord_cpf') ?? null }}" name="landlord_cpf" maxlength="11">
+                                    value="{{ old('landlord_cpf') ?? null }}" required name="landlord_cpf" maxlength="11">
                                 <small class="very-small text-danger">CPF com 11 dígitos</small>
                             @else
                                 <input type="text" class="form-control bg-transparent" id="landlord_cpf"
-                                    value="{{ old('landlord_cpf') ?? null }}" name="landlord_cpf" maxlength="11">
+                                    value="{{ old('landlord_cpf') ?? null }}" required name="landlord_cpf" maxlength="11">
                             @enderror
                         </div>
                         <div class="col mt-0">
@@ -54,11 +54,11 @@
                             @error('driver_license_number')
                                 <input type="text" class="form-control bg-transparent border-danger"
                                     id="driver_license_number" value="{{ old('driver_license_number') ?? null }}"
-                                    name="driver_license_number">
+                                    required name="driver_license_number">
                                 <small class="very-small text-danger">Apenas números</small>
                             @else
                                 <input type="text" class="form-control bg-transparent" id="driver_license_number"
-                                    value="{{ old('driver_license_number') ?? null }}" name="driver_license_number">
+                                    value="{{ old('driver_license_number') ?? null }}" required name="driver_license_number">
                             @enderror
                         </div>
                     </div>
@@ -69,11 +69,11 @@
                             @error('driver_license_issue_date')
                                 <input type="date" class="form-control bg-transparent border-danger"
                                     id="driver_license_issue_date" value="{{ old('driver_license_issue_date') ?? null }}"
-                                    name="driver_license_issue_date">
+                                    required name="driver_license_issue_date">
                                 <small class="very-small text-danger">Data válida</small>
                             @else
                                 <input type="date" class="form-control bg-transparent" id="driver_license_issue_date"
-                                    value="{{ old('driver_license_issue_date') ?? null }}" name="driver_license_issue_date">
+                                    value="{{ old('driver_license_issue_date') ?? null }}" required name="driver_license_issue_date">
                             @enderror
                         </div>
                         <div class="col mt-0">
@@ -81,11 +81,11 @@
                                     class="text-danger"><strong>*</strong></span></label>
                             @error('birth_date')
                                 <input type="date" class="form-control bg-transparent border-danger" id="birth_date"
-                                    value="{{ old('birth_date') ?? null }}" name="birth_date">
+                                    value="{{ old('birth_date') ?? null }}" required name="birth_date">
                                 <small class="very-small text-danger">Data válida</small>
                             @else
                                 <input type="date" class="form-control bg-transparent" id="birth_date"
-                                    value="{{ old('birth_date') ?? null }}" name="birth_date">
+                                    value="{{ old('birth_date') ?? null }}" required name="birth_date">
                             @enderror
                         </div>
                     </div>
@@ -95,11 +95,11 @@
                                     class="text-danger"><strong>*</strong></span></label>
                             @error('zip_code')
                                 <input type="text" class="form-control bg-transparent border-danger" id="zip_code"
-                                    value="{{ old('zip_code') ?? null }}" name="zip_code" maxlength="8">
+                                    value="{{ old('zip_code') ?? null }}" required name="zip_code" maxlength="8">
                                 <small class="very-small text-danger">8 dígitos</small>
                             @else
                                 <input type="text" class="form-control bg-transparent" id="zip_code"
-                                    value="{{ old('zip_code') ?? null }}" name="zip_code" maxlength="8">
+                                    value="{{ old('zip_code') ?? null }}" required name="zip_code" maxlength="8">
                             @enderror
                         </div>
                         <div class="col mt-0">
@@ -107,11 +107,11 @@
                                     class="text-danger"><strong>*</strong></span></label>
                             @error('street')
                                 <input type="text" class="form-control bg-transparent border-danger" id="street"
-                                    value="{{ old('street') ?? null }}" name="street">
+                                    value="{{ old('street') ?? null }}" required name="street">
                                 <small class="very-small text-danger">Nome da rua</small>
                             @else
                                 <input type="text" class="form-control bg-transparent" id="street"
-                                    value="{{ old('street') ?? null }}" name="street">
+                                    value="{{ old('street') ?? null }}" required name="street">
                             @enderror
                         </div>
                     </div>
@@ -119,7 +119,7 @@
                         <div class="col-2 mt-0">
                             <label for="state" class="form-label fw-light">Estado<span
                                     class="text-danger"><strong>*</strong></span></label>
-                            <select name="state" id="state"
+                            <select required name="state" id="state"
                                 class="form-control bg-transparent @error('state') border-danger @enderror">
                                 <option value="" class="text-black" @selected(!old('state')) disabled>—</option>
                                 <option @selected(old('state') && old('state') === 'AC') value="AC" class="text-black">AC</option>
@@ -156,11 +156,11 @@
                                     class="text-danger"><strong>*</strong></span></label>
                             @error('city')
                                 <input type="text" class="form-control bg-transparent border-danger" id="city"
-                                    value="{{ old('city') ?? null }}" name="city">
+                                    value="{{ old('city') ?? null }}" required name="city">
                                 <small class="very-small text-danger">Digite a cidade</small>
                             @else
                                 <input type="text" class="form-control bg-transparent" id="city"
-                                    value="{{ old('city') ?? null }}" name="city">
+                                    value="{{ old('city') ?? null }}" required name="city">
                             @enderror
                         </div>
                         <div class="col-5 mt-0">
@@ -168,11 +168,11 @@
                                     class="text-danger"><strong>*</strong></span></label>
                             @error('neighborhood')
                                 <input type="text" class="form-control bg-transparent border-danger" id="neighborhood"
-                                    value="{{ old('neighborhood') ?? null }}" name="neighborhood">
+                                    value="{{ old('neighborhood') ?? null }}" required name="neighborhood">
                                 <small class="very-small text-danger">Digite o bairro</small>
                             @else
                                 <input type="text" class="form-control bg-transparent" id="neighborhood"
-                                    value="{{ old('neighborhood') ?? null }}" name="neighborhood">
+                                    value="{{ old('neighborhood') ?? null }}" required name="neighborhood">
                             @enderror
                         </div>
                     </div>
@@ -206,22 +206,22 @@
                                     class="text-danger"><strong>*</strong></span></label>
                             @error('phone_1')
                                 <input type="text" class="form-control bg-transparent border-danger" id="phone_1"
-                                    value="{{ old('phone_1') ?? null }}" name="phone_1">
+                                    value="{{ old('phone_1') ?? null }}" required name="phone_1" maxlength="11">
                                 <small class="very-small text-danger">Telefone com 11 dígitos</small>
                             @else
                                 <input type="text" class="form-control bg-transparent" id="phone_1"
-                                    value="{{ old('phone_1') ?? null }}" name="phone_1">
+                                    value="{{ old('phone_1') ?? null }}" required name="phone_1" maxlength="11">
                             @enderror
                         </div>
                         <div class="col mt-0">
                             <label for="phone_2" class="form-label fw-light">Telefone 2</label>
                             @error('phone_2')
                                 <input type="text" class="form-control bg-transparent border-danger" id="phone_2"
-                                    value="{{ old('phone_2') ?? null }}" name="phone_2">
+                                    value="{{ old('phone_2') ?? null }}" name="phone_2" maxlength="11">
                                 <small class="very-small text-danger">Telefone com 11 dígitos</small>
                             @else
                                 <input type="text" class="form-control bg-transparent" id="phone_2"
-                                    value="{{ old('phone_2') ?? null }}" name="phone_2">
+                                    value="{{ old('phone_2') ?? null }}" name="phone_2" maxlength="11">
                             @enderror
                         </div>
                     </div>
@@ -229,33 +229,33 @@
                         <label for="mother_name" class="form-label fw-light">Nome da mãe</label>
                         @error('mother_name')
                             <input type="text" class="form-control bg-transparent border-danger" id="mother_name"
-                                value="{{ old('mother_name') ?? null }}" name="mother_name">
+                                value="{{ old('mother_name') ?? null }}" name="mother_name" maxlength="150">
                             <small class="very-small text-danger">Escreva o nome da mãe</small>
                         @else
                             <input type="text" class="form-control bg-transparent" id="mother_name"
-                                value="{{ old('mother_name') ?? null }}" name="mother_name">
+                                value="{{ old('mother_name') ?? null }}" name="mother_name" maxlength="150">
                         @enderror
                     </div>
                     <div class="mt-3">
                         <label for="father_name" class="form-label fw-light">Nome do pai</label>
                         @error('father_name')
                             <input type="text" class="form-control bg-transparent border-danger" id="father_name"
-                                value="{{ old('father_name') ?? null }}" name="father_name">
+                                value="{{ old('father_name') ?? null }}" name="father_name" maxlength="150">
                             <small class="very-small text-danger">Escreva o nome do pai</small>
                         @else
                             <input type="text" class="form-control bg-transparent" id="father_name"
-                                value="{{ old('father_name') ?? null }}" name="father_name">
+                                value="{{ old('father_name') ?? null }}" name="father_name" maxlength="150">
                         @enderror
                     </div>
                     <div class="mt-3">
                         <label for="photo" class="form-label fw-light">Foto do locador</label>
                         @error('photo')
                             <input class="form-control bg-transparent border-danger text-white" type="file" id="photo"
-                                value="{{ old('photo') ?? null }}" name="photo">
+                                accept=".png, .jpg, .jpeg" value="{{ old('photo') ?? null }}" name="photo">
                             <small class="very-small text-danger">Arquivo PNG</small>
                         @else
                             <input class="form-control bg-transparent text-white" type="file" id="photo"
-                                value="{{ old('photo') ?? null }}" name="photo">
+                                accept=".png, .jpg, .jpeg" value="{{ old('photo') ?? null }}" name="photo">
                         @enderror
                     </div>
                     <div class="mt-4"><small><strong>Dados sobre o veículo:</strong></small></div>
@@ -285,7 +285,7 @@
                                                 <div class="col-4 text-center">
                                                     <div class="vehicle rounded-3 py-2 {{ $borderDanger }}">
                                                         <input type="radio" @checked(old('vehicle_id') && old('vehicle_id') === $vehicle->id)
-                                                            name="vehicle_id" value="{{ $vehicle->id }}">
+                                                            required name="vehicle_id" value="{{ $vehicle->id }}" @required(!old('vehicle_id'))>
                                                         <br><small>{{ $vehicle->brand }} {{ $vehicle->model }}</small>
                                                         <br><small>{{ $vehicle->license_plate }}</small>
                                                         <br><small>KM: {{ $vehicle->actual_km }}</small>
@@ -324,11 +324,11 @@
                         class="text-danger"><strong>*</strong></span></label>
                 @error('revision_period')
                     <input type="text" class="form-control bg-transparent border-danger" id="revision_period"
-                        value="{{ old('revision_period') ?? null }}" name="revision_period">
+                        value="{{ old('revision_period') ?? null }}" required name="revision_period" maxlength="6">
                     <small class="very-small text-danger">Apenas números</small>
                 @else
                     <input type="text" class="form-control bg-transparent" id="revision_period"
-                        value="{{ old('revision_period') ?? null }}" name="revision_period">
+                        value="{{ old('revision_period') ?? null }}" required name="revision_period" maxlength="6">
                 @enderror
             </div>
             <div class="col mt-0">
@@ -336,11 +336,11 @@
                         class="text-danger"><strong>*</strong></span></label>
                 @error('oil_period')
                     <input type="text" class="form-control bg-transparent border-danger" id="oil_period"
-                        value="{{ old('oil_period') ?? null }}" name="oil_period">
+                        value="{{ old('oil_period') ?? null }}" required name="oil_period" maxlength="6">
                     <small class="very-small text-danger">Apenas números</small>
                 @else
                     <input type="text" class="form-control bg-transparent" id="oil_period"
-                        value="{{ old('oil_period') ?? null }}" name="oil_period">
+                        value="{{ old('oil_period') ?? null }}" required name="oil_period" maxlength="6">
                 @enderror
             </div>
         </div>
@@ -351,11 +351,11 @@
                         class="text-danger"><strong>*</strong></span></label>
                 @error('cost')
                     <input type="text" class="form-control bg-transparent border-danger" id="cost"
-                        value="{{ old('cost') ?? null }}" name="cost">
+                        value="{{ old('cost') ?? null }}" required name="cost" maxlength="6">
                     <small class="very-small text-danger">Apenas números</small>
                 @else
                     <input type="text" class="form-control bg-transparent" id="cost"
-                        value="{{ old('cost') ?? null }}" name="cost">
+                        value="{{ old('cost') ?? null }}" required name="cost" maxlength="6">
                 @enderror
             </div>
             <div class="col mt-0">
@@ -363,11 +363,11 @@
                         class="text-danger"><strong>*</strong></span></label>
                 @error('deposit')
                     <input type="text" class="form-control bg-transparent border-danger" id="deposit"
-                        value="{{ old('deposit') ?? null }}" name="deposit">
+                        value="{{ old('deposit') ?? null }}" required name="deposit" maxlength="6">
                     <small class="very-small text-danger">Apenas números</small>
                 @else
                     <input type="text" class="form-control bg-transparent" id="deposit"
-                        value="{{ old('deposit') ?? null }}" name="deposit">
+                        value="{{ old('deposit') ?? null }}" required name="deposit" maxlength="6">
                 @enderror
             </div>
         </div>
@@ -377,17 +377,17 @@
                         class="text-danger"><strong>*</strong></span></label>
                 @error('start_date')
                     <input type="date" class="form-control bg-transparent border-danger" id="start_date"
-                        value="{{ old('start_date') ?? null }}" name="start_date">
+                        value="{{ old('start_date') ?? null }}" required name="start_date" max="{{ now() }}">
                     <small class="very-small text-danger">Data válida</small>
                 @else
                     <input type="date" class="form-control bg-transparent" id="start_date"
-                        value="{{ old('start_date') ?? null }}" name="start_date">
+                        value="{{ old('start_date') ?? null }}" required name="start_date" max="{{ now() }}">
                 @enderror
             </div>
             <div class="col mt-0">
                 <label for="end_date" class="form-label fw-light">Duração do contrato<span
                         class="text-danger"><strong>*</strong></span></label>
-                <select name="end_date" class="form-control bg-transparent" id="end_date">
+                <select required name="end_date" class="form-control bg-transparent" id="end_date">
                     <option class="text-black" @selected(old('end_date') && old('end_date') == 1) value="1">1 mês</option>
                     <option class="text-black" @selected(old('end_date') && old('end_date') == 3) value="3">3 meses</option>
                     <option class="text-black" @selected(old('end_date') && old('end_date') == 6) value="6">6 meses</option>
@@ -404,7 +404,8 @@
         <div class="row g-3 mt-3">
             <div class="col mt-0">
                 <label for="observation" class="form-label fw-light">Observação</label>
-                <textarea rows="3" class="form-control bg-transparent text-white" id="observation" name="observation">{{ old('observation') ?? null }}</textarea>
+                <textarea rows="3" class="form-control bg-transparent text-white" id="observation" name="observation"
+                    maxlength="1000">{{ old('observation') ?? null }}</textarea>
             </div>
         </div>
         <div class="row g-3 mt-5 mb-5">
@@ -442,15 +443,40 @@
                         .then(data => {
                             if (data.erro) {
                                 alert('CEP não encontrado');
+                                streetInput.value = null
+                                stateSelect.value = null
+                                cityInput.value = null
+                                neighborhoodInput.value = null
+                                complementInput.value = null
                                 return;
                             }
 
                             // Preenche os campos com os dados retornados
-                            streetInput.value = data.logradouro || '';
-                            stateSelect.value = data.uf || '';
-                            cityInput.value = data.localidade || '';
-                            neighborhoodInput.value = data.bairro || '';
-                            complementInput.value = data.complemento || '';
+                            streetInput.value = data.logradouro || null
+                            if (complementInput.value !== '') {
+                                streetInput.dispatchEvent(new Event('input'));
+                            }
+
+                            stateSelect.value = data.uf || null
+                            if (complementInput.value !== '') {
+                                stateSelect.dispatchEvent(new Event('input'));
+                            }
+
+                            cityInput.value = data.localidade || null
+                            if (complementInput.value !== '') {
+                                console.log(1)
+                                cityInput.dispatchEvent(new Event('input'));
+                            }
+
+                            neighborhoodInput.value = data.bairro || null
+                            if (complementInput.value !== '') {
+                                neighborhoodInput.dispatchEvent(new Event('input'));
+                            }
+
+                            complementInput.value = data.complemento || null
+                            if (complementInput.value !== '') {
+                                complementInput.dispatchEvent(new Event('input'));
+                            }
                         })
                         .catch(error => {
                             console.error('Erro:', error);
@@ -481,7 +507,8 @@
                         parentWithBorderDanger.classList.remove('border-danger');
                     }
 
-                    const smallTextDanger = field.closest('.col')?.querySelector('small.text-danger');
+                    const smallTextDanger = field.closest('.col')?.querySelector(
+                        'small.text-danger');
                     if (smallTextDanger) {
                         smallTextDanger.remove();
                     }
