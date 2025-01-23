@@ -12,9 +12,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
     <style>
-        input, select{
+        input,
+        select {
             color: #FFFFFF !important;
         }
+
         body {
             background-color: #242424;
             font-family: "Roboto", serif;
@@ -44,48 +46,36 @@
         @yield('content')
     </div>
     @yield('options-button')
-    <div class="menu bottom-0 rounded-top-5 pt-1">
-        <div class="row g-0 justify-content-evenly align-items-center h-100">
-            <div class="col-auto">
-                <a href="{{ route('home') }}" class="row g-2 text-decoration-none text-white">
-                    <div class="col-12 text-center">
-                        <img src="{{ asset('assets/svg/home.svg') }}" alt="" class="img-fluid">
-                    </div>
-                    <div class="col-12 text-center">
-                        <small>Home</small>
-                    </div>
-                </a>
-            </div>
-            <div class="col-auto">
-                <a href="{{ route('vehicle.index') }}" class="row g-2 text-decoration-none text-white">
-                    <div class="col-12 text-center">
-                        <img src="{{ asset('assets/svg/bike.svg') }}" alt="" class="img-fluid">
-                    </div>
-                    <div class="col-12 text-center">
-                        <small>Motocicletas</small>
-                    </div>
-                </a>
-            </div>
-            <div class="col-auto">
-                <a href="{{ route('rental.index') }}" class="row g-2 text-decoration-none text-white">
-                    <div class="col-12 text-center">
-                        <img src="{{ asset('assets/svg/book.svg') }}" alt="" class="img-fluid">
-                    </div>
-                    <div class="col-12 text-center">
-                        <small>Locações</small>
-                    </div>
-                </a>
-            </div>
-            <div class="col-auto">
-                <a href="{{ route('home') }}" class="row g-2 text-decoration-none text-white">
-                    <div class="col-12 text-center">
-                        <img src="{{ asset('assets/svg/notification.svg') }}" alt="" class="img-fluid">
-                    </div>
-                    <div class="col-12 text-center">
-                        <small>Lembretes</small>
-                    </div>
-                </a>
-            </div>
+    <div class="menu bottom-0 rounded-top-5 pt-2">
+        <div class="row justify-content-evenly justify-content-lg-center g-0 align-items-end gap-lg-5">
+            <a href="{{ route('home') }}" class="col-auto text-center text-white text-decoration-none">
+                <div style="height: 36px;" class="d-flex align-items-end">
+                    <img src="{{ asset('assets/svg/home.svg') }}" alt="" class="d-block mx-auto mb-1 h-auto" style="width: 28px;">
+                </div>
+                <small>Home</small>
+            </a>
+            
+            <a href="{{ route('home') }}" class="col-auto text-center text-white text-decoration-none">
+                <div style="height: 36px;" class="d-flex align-items-end">
+                    <img src="{{ asset('assets/svg/bike.svg') }}" alt="" class="d-block mx-auto h-auto" style="width: 36px;">
+                </div>
+                <small>Motocicletas</small>
+            </a>
+            
+            <a href="{{ route('home') }}" class="col-auto text-center text-white text-decoration-none">
+                <div style="height: 36px;" class="d-flex align-items-end">
+                    <img src="{{ asset('assets/svg/book.svg') }}" alt="" class="d-block mx-auto mb-1 img-fluid" style="width: 26px;">
+                </div>
+                <small>Locações</small>
+            </a>
+            
+            <a href="{{ route('home') }}" class="col-auto text-center text-white text-decoration-none">
+                <div style="height: 36px;" class="d-flex align-items-end">
+                    <img src="{{ asset('assets/svg/notification.svg') }}" alt="" class="d-block mx-auto mb-1 img-fluid" style="width: 26px;">
+                </div>
+                <small>Lembretes</small>
+            </a>
+            
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

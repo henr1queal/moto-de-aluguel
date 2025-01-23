@@ -14,14 +14,14 @@
             </div>
         </div>
         <div class="row g-0 mt-4 g-3">
-            <div class="col-6 d-flex">
+            <div class="col-6 col-lg-2 d-flex">
                 <a href="{{ route('vehicle.index') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                     <div class="row g-0">
                         <div class="pt-3 pb-2 px-4 text-center">
                             <div class="row g-0 gap-2">
                                 <img src="{{ asset('assets/svg/bike.svg') }}" alt=""
-                                    style="width: 30px; height: auto;" class="mx-auto">
+                                    style="width: 40px; height: auto;" class="mx-auto">
                                 <p class="mb-0 fw-light" style="font-size: 16px;">
                                     Gerencie suas motocicletas com facilidade
                                 </p>
@@ -33,7 +33,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-6 d-flex">
+            <div class="col-6 col-lg-2 d-flex">
                 <a href="{{ route('rental.index') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                     <div class="row g-0">
@@ -52,7 +52,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-6 d-flex">
+            <div class="col-6 col-lg-2 d-flex">
                 <a href="{{ route('profile.edit') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                     <div class="row g-0">
@@ -71,7 +71,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-6 d-flex">
+            <div class="col-6 col-lg-2 d-flex">
                 <a href="{{ route('profile.edit') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                     <div class="row g-0">
@@ -90,7 +90,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-6 d-flex">
+            <div class="col-6 col-lg-2 d-flex">
                 <a href="{{ route('profile.edit') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                     <div class="row g-0">
@@ -109,7 +109,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-6 d-flex">
+            <div class="col-6 col-lg-2 d-flex">
                 <a href="{{ route('profile.edit') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                     <div class="row g-0">
