@@ -55,14 +55,14 @@
                 <small>Home</small>
             </a>
             
-            <a href="{{ route('home') }}" class="col-auto text-center text-white text-decoration-none">
+            <a href="{{ route('vehicle.index') }}" class="col-auto text-center text-white text-decoration-none">
                 <div style="height: 36px;" class="d-flex align-items-end">
                     <img src="{{ asset('assets/svg/bike.svg') }}" alt="" class="d-block mx-auto h-auto" style="width: 36px;">
                 </div>
                 <small>Motocicletas</small>
             </a>
             
-            <a href="{{ route('home') }}" class="col-auto text-center text-white text-decoration-none">
+            <a href="{{ route('rental.index') }}" class="col-auto text-center text-white text-decoration-none">
                 <div style="height: 36px;" class="d-flex align-items-end">
                     <img src="{{ asset('assets/svg/book.svg') }}" alt="" class="d-block mx-auto mb-1 img-fluid" style="width: 26px;">
                 </div>
