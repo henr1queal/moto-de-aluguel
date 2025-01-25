@@ -6,7 +6,7 @@
         }
 
         .info-placa {
-            bottom: -8%;
+            bottom: -26%;
             z-index: 2;
         }
 
@@ -58,8 +58,8 @@
                 </div>
             @else
                 @foreach ($myRentals as $rental)
-                    <div class="col-6 d-flex pb-4">
-                        <a href="{{ route('profile.edit') }}"
+                    <div class="col-6 d-flex mb-5">
+                        <a href="{{ route('rental.show', ['rental' => $rental->id]) }}"
                             class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                             <div class="row justify-content-center g-0">
                                 <div class="col-12 text-center">
@@ -71,7 +71,13 @@
                                         </div>
                                         <div class="info-placa position-absolute w-100"
                                             style="left: 50%; transform: translateX(-50%);">
-                                            <span class="fs-4 text-break text-black"><strong>SAE-2H75</strong></span>
+                                            <span class="fs-4 text-break text-black mb-0"><strong>{{ $rental->vehicle->license_plate }}</strong></span>
+                                            @if ($rental->finished_at === null)
+                                            <br><small class="text-success"><strong>Ativa</strong></small>                                                
+                                            @else
+                                            <br><small class="text-danger"><strong>Finalizada</strong></small>                                                
+
+                                            @endif
                                         </div>
                                         <img src="{{ asset('assets/svg/placa.svg') }}" alt=""
                                             class="position-absolute placa" style="left: 50%; transform: translateX(-50%);">
