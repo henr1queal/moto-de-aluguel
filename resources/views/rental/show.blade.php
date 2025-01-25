@@ -8,6 +8,11 @@
         .very-small {
             font-size: 12px;
         }
+
+        .content {
+            height: 85dvh;
+            margin-bottom: 10px;
+        }
     </style>
 @endsection
 @section('content')
@@ -45,7 +50,7 @@
             @method('PATCH')
             <div class="row g-0">
                 <div class="col text-center">
-                    <h1 style="font-size: 20px;">Nova locação</h1>
+                    <h1 style="font-size: 20px;">Visualizando Locação</h1>
                 </div>
             </div>
             <div class="row mt-4 g-3">
@@ -354,6 +359,74 @@
                 </div>
             </div>
         </form>
+        <!-- Modal KM Diária-->
+        <div class="modal fade text-black" id="kmDiariaModal" tabindex="-1" aria-labelledby="kmDiariaModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="kmDiariaModalLabel">KM Diária</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="kmDiariaModalBody">
+                        ...
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+@section('options-button')
+    <div class="container text-end pe-4">
+        <div class="btn-group dropup-center dropup">
+            <button type="button" class="btn btn-light fs-1 py-0 rounded-3" data-bs-toggle="dropdown"
+                aria-expanded="false" style="height: 44px;">
+                <div class="pt-1 rounded-2 bg-black" style="width: 20px;"></div>
+                <div class="pt-1 rounded-2 bg-black mt-1" style="width: 20px;"></div>
+                <div class="pt-1 rounded-2 bg-black mt-1" style="width: 20px;"></div>
+            </button>
+            <ul class="dropdown-menu p-2 text-center shadow mb-1" style="width: auto; min-width: 70px;">
+                <li>
+                    <a href="#" class="d-block text-decoration-none text-black">
+                        <img src="{{ asset('assets/svg/multa.svg') }}" alt="Icon 1" class="img-fluid mx-auto"
+                            style="width: 30px; height: auto;">
+                        <small class="d-block" style="font-size: 12px;">Multas</small>
+                    </a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <a href="#" class="d-block text-decoration-none text-black">
+                        <img src="{{ asset('assets/svg/chave-inglesa.svg') }}" alt="Icon 2" class="img-fluid mx-auto"
+                            style="width: 30px; height: auto;">
+                        <small class="d-block" style="font-size: 12px;">Manut.</small>
+                    </a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <a href="#" class="d-block text-decoration-none text-black">
+                        <span class="fs-2 text-black"><strong>$</strong></span>
+                        <small class="d-block" style="font-size: 12px;">Finanças</small>
+                    </a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <a href="#" class="d-block text-decoration-none text-black" data-bs-toggle="modal"
+                        data-bs-target="#kmDiariaModal" onclick="fetchApiData()">
+                        <span class="fs-2 text-black"><strong>KM</strong></span>
+                        <small class="d-block" style="font-size: 12px;">KM Diária</small>
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
 @endsection
 @section('scripts')
@@ -464,5 +537,34 @@
                 submitButton.disabled = true;
             }
         });
+
+        function fetchApiData() {
+            // Aqui você define a URL da API
+            const apiUrl = '/km-diaria/{{ $rental->vehicle->id }}/{{ $rental->id }}'; // Substitua com o seu endpoint da API
+
+            // Chama a API
+            fetch(apiUrl)
+                .then(response => response.json()) // Converte a resposta para JSON
+                .then(data => {
+                    // Atualiza o conteúdo do modal com os dados da API
+                    const resultsContainer = document.getElementById('kmDiariaModalBody');
+                    // Verifica se há dados e exibe
+                    if (data && data.data.length > 0) {
+                        let html = '<ul>';
+                        data.data.forEach(item => {
+                            html += `<li>${item.actual_km}</li>`; // Substitua conforme a estrutura da sua resposta
+                        });
+                        html += '</ul>';
+                        resultsContainer.innerHTML = html;
+                    } else {
+                        resultsContainer.innerHTML = 'Nenhum dado encontrado.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar dados:', error);
+                    const resultsContainer = document.getElementById('kmDiariaModalBody');
+                    resultsContainer.innerHTML = 'Erro ao carregar os dados.';
+                });
+        }
     </script>
 @endsection

@@ -93,7 +93,7 @@
 @endsection
 @section('options-button')
     <div class="container text-end pe-4">
-        <a href="{{ route('rental.new') }}" class="btn btn-light fs-1 py-0 rounded-3 text-decoration-none">
+        <a href="{{ route('rental.new') }}" class="btn btn-light fs-1 py-0 rounded-3 text-decoration-none" style="height: 44px;">
             <strong>+</strong>
         </a>
     </div>
