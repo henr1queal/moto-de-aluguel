@@ -8,6 +8,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class RentalController extends Controller
 {
@@ -16,7 +18,10 @@ class RentalController extends Controller
      */
     public function index()
     {
-        $myRentals = Auth()->user()->rentals;
+        $myRentals = Auth()->user()->rentals()
+            ->orderByRaw('finished_at IS NULL DESC') // Prioriza os registros com finished_at = NULL
+            ->orderBy('finished_at', 'desc') // Depois, ordena finished_at pelos mais recentes
+            ->paginate(10);
         return view('rental.index', compact('myRentals'));
         //
     }
@@ -44,7 +49,7 @@ class RentalController extends Controller
             DB::beginTransaction();
             // $photoPath = $this->uploadPhoto($request->file('photo'));
             $photoPath = '123';
-            $rental = $this->createRental($validated, $photoPath);
+            $this->createRental($validated, $photoPath);
             $this->updateVehicle($validated['vehicle_id'], $request->only(['revision_period', 'oil_period']));
 
             DB::commit();
@@ -65,7 +70,8 @@ class RentalController extends Controller
      */
     public function show(Rental $rental)
     {
-        //
+        $rental->load('vehicle');
+        return view('rental.show', compact('rental'));
     }
 
     /**
@@ -81,7 +87,39 @@ class RentalController extends Controller
      */
     public function update(Request $request, Rental $rental)
     {
-        //
+
+        try {
+            $validated = $this->validateRentalUpdateData($request);
+            DB::beginTransaction();
+
+            if (!$rental->photo && isset($validated['photo'])) {
+                $photoPath = '123';
+                $validated['photo'] = $photoPath;
+            }
+
+            $rental->fill($validated);
+
+            if ($rental->isDirty()) {
+                $rental->save(); // Salva somente se houver mudanças
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Locação atualizada com sucesso!');
+        } catch (ValidationException $e) {
+            // Adiciona os erros de validação na sessão
+            $errorMessages = $e->validator->errors()->all(); // Retorna todos os erros como um array
+            return redirect()->back()
+                ->with('error', implode(' ', $errorMessages)) // Une os erros em uma única mensagem
+                ->withInput($e->validator->validated());
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            if (isset($photoPath)) {
+                Storage::disk('public')->delete($photoPath);
+            }
+            return redirect()->back()->with('error', 'Corrija os dados do formulário e tente novamente.');
+        }
     }
 
     /**
@@ -162,11 +200,85 @@ class RentalController extends Controller
                     }
                 },
             ],
-            'observation' => 'string|max:1000',
+            'observation' => 'string|nullable|max:1000',
             'oil_period' => 'required|integer|max:999999',
             'revision_period' => 'required|integer|max:999999',
         ]);
     }
+
+    protected function validateRentalUpdateData(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'landlord_name' => [
+                'required',
+                'string',
+                'max:150',
+                function ($attribute, $value, $fail) {
+                    if (str_word_count($value) < 2) {
+                        $fail('O nome do locador deve conter pelo menos dois nomes.');
+                    }
+                },
+            ],
+            'landlord_cpf' => 'required|string|size:11',
+            'driver_license_number' => 'required|string|min:7|max:25',
+            'driver_license_issue_date' => 'required|date|before:today',
+            'birth_date' => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) {
+                    $birthDate = \Carbon\Carbon::parse($value);
+                    if ($birthDate->diffInYears(\Carbon\Carbon::now()) < 18) {
+                        $fail('A data de nascimento deve indicar que a pessoa tem ao menos 18 anos.');
+                    }
+                },
+            ],
+            'phone_1' => 'required|string|size:11',
+            'phone_2' => 'nullable|string|size:11',
+            'mother_name' => [
+                'nullable',
+                'string',
+                'max:150',
+                function ($attribute, $value, $fail) {
+                    if ($value && str_word_count($value) < 2) {
+                        $fail('O nome da mãe deve conter pelo menos dois nomes.');
+                    }
+                },
+            ],
+            'father_name' => [
+                'nullable',
+                'string',
+                'max:150',
+                function ($attribute, $value, $fail) {
+                    if ($value && str_word_count($value) < 2) {
+                        $fail('O nome do pai deve conter pelo menos dois nomes.');
+                    }
+                },
+            ],
+            'cost' => 'required|numeric|min:0|max:999999',
+            'deposit' => 'required|numeric|min:0|max:999999',
+            'zip_code' => 'required|string|size:8',
+            'state' => 'required|string|max:2|in:AC,AL,AP,AM,BA,CE,DF,ES,GO,MA,MS,MT,MG,PA,PB,PR,PE,PI,RJ,RN,RS,RO,RR,SC,SP,SE,TO',
+            'city' => 'required|string|min:3|max:50',
+            'neighborhood' => 'required|string|min:2|max:100',
+            'street' => 'required|string|min:2|max:100',
+            'house_number' => 'nullable|integer|max:999999',
+            'complement' => 'nullable|string|max:150',
+            'photo' => 'nullable|image|max:2048',
+            'observation' => 'string|nullable|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            // Retorna os dados validados parcialmente e os erros
+            throw ValidationException::withMessages([
+                'errors' => $validator->errors(),
+                'validated' => $validator->validated(),
+                ''
+            ]);
+        }
+
+        return $validator->validated();
+    }
+
 
     // protected function uploadPhoto($photo)
     // {
