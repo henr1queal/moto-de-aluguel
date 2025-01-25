@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
@@ -43,28 +45,33 @@ class Vehicle extends Model
         return $this->where('user_id', Auth()->user()->id);
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function rentals()
+    public function rentals(): HasMany
     {
         return $this->hasMany(Rental::class);
     }
 
-    public function maintenances()
+    public function maintenances(): HasMany
     {
         return $this->hasMany(Maintenance::class);
     }
 
-    public function oilChanges()
+    public function oilChanges(): HasMany
     {
         return $this->hasMany(OilChange::class);
     }
 
-    public function fines()
+    public function fines(): HasMany
     {
         return $this->hasMany(Fine::class);
+    }
+
+    public function mileageHistory(): HasMany
+    {
+        return $this->hasMany(MileageHistory::class);
     }
 }

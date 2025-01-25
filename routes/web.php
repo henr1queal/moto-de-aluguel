@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MileageHistoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\VehicleController;
@@ -20,11 +21,11 @@ Route::get('/', function () {
     return view('start.page');
 })->middleware(['auth', 'verified'])->name('home');
 
+Route::get('/locacoes/adicionar', [RentalController::class, 'create'])->middleware(['auth', 'verified'])->name('rental.new');
 Route::get('/locacoes', [RentalController::class, 'index'])->middleware(['auth', 'verified'])->name('rental.index');
 Route::get('/locacoes/{rental}', [RentalController::class, 'show'])->middleware(['auth', 'verified'])->name('rental.show');
 Route::post('/locacoes', [RentalController::class, 'store'])->middleware(['auth', 'verified'])->name('rental.store');
 Route::patch('/locacoes/{rental}', [RentalController::class, 'update'])->middleware(['auth', 'verified'])->name('rental.patch');
-Route::get('/locacoes/adicionar', [RentalController::class, 'create'])->middleware(['auth', 'verified'])->name('rental.new');
 
 Route::view('/veiculos/adicionar', 'vehicle.new')->middleware(['auth', 'verified'])->name('vehicle.new');
 Route::get('/veiculos', [VehicleController::class, 'index'])->middleware(['auth', 'verified'])->name('vehicle.index');
@@ -33,6 +34,7 @@ Route::get('/veiculos/{vehicle}', [VehicleController::class, 'show'])->middlewar
 Route::delete('/veiculos/{vehicle}', [VehicleController::class, 'destroy'])->middleware(['auth', 'verified'])->name('vehicle.delete');
 Route::patch('/veiculos/{vehicle}', [VehicleController::class, 'update'])->name('vehicle.update');
 
+Route::get('/km-diaria/{vehicle}/{rental?}', [MileageHistoryController::class, 'index'])->middleware(['auth', 'verified'])->name('vehicle.show');
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
