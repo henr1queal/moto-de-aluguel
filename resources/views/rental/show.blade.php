@@ -25,7 +25,7 @@
                         <div class="toast-body">
                             {{ session('success') }}
                         </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
                             aria-label="Close"></button>
                     </div>
                 </div>
@@ -37,7 +37,7 @@
                         <div class="toast-body">
                             {{ session('error') }}
                         </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
                             aria-label="Close"></button>
                     </div>
                 </div>
@@ -359,21 +359,64 @@
                 </div>
             </div>
         </form>
-        <!-- Modal KM Diária-->
-        <div class="modal fade text-black" id="kmDiariaModal" tabindex="-1" aria-labelledby="kmDiariaModalLabel"
+        <!-- Modal listagem KM Diária-->
+        <div class="modal fade" id="kmDiariaModal" tabindex="-1" aria-labelledby="kmDiariaModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
+                <div class="modal-content" style="background-color: #242424;">
                     <div class="modal-header">
                         <h1 class="modal-title fs-5" id="kmDiariaModalLabel">KM Diária</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
-                    <div class="modal-body" id="kmDiariaModalBody">
-                        ...
+                    <div class="modal-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <small class="text-white">Histório de quilometragem diária</small>
+                            </div>
+                            <div class="col text-end"><button class="btn btn-primary btn-sm rounded-3 border-white fs-6"
+                                    data-bs-toggle="modal" data-bs-target="#criacaokmDiariaModal">Novo anexo</button>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col" id="kmDiariaModalBody">...</div>
+                        </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal criação KM Diária-->
+        <div class="modal fade" id="criacaokmDiariaModal" tabindex="-1" aria-labelledby="criacaokmDiariaModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="background-color: #242424;">
+                    <form action="{{ route('milleage.store', ['vehicle' => $rental->vehicle->id]) }}" method="post">
+                        @csrf
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="criacaokmDiariaModalLabel">Anexar KM Diária</h1>
+                            <button type="button" class="btn-close btn-close-white" data-bs-toggle="modal"
+                                data-bs-target="#kmDiariaModal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col">
+                                    <label for="actual_km" class="form-label fw-light">KM Atual<span
+                                            class="text-danger"><strong>*</strong></span></label>
+                                    <input type="number" class="form-control bg-transparent" id="actual_km" required
+                                        name="actual_km" max="999999">
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">
+                                    <label for="observation" class="form-label fw-light">Observação</label>
+                                    <textarea class="form-control bg-transparent text-white" name="observation" id="observation" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top-0">
+                            <button type="submit" class="btn btn-success w-100 btn-lg">Salvar</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -538,24 +581,66 @@
             }
         });
 
-        function fetchApiData() {
-            // Aqui você define a URL da API
-            const apiUrl = '/km-diaria/{{ $rental->vehicle->id }}/{{ $rental->id }}'; // Substitua com o seu endpoint da API
+        let mileageHistoryViewed = false;
 
-            // Chama a API
+        let currentPage = 1; // Página inicial
+
+        function fetchApiData(page = 1) {
+            const apiUrl =
+                `/km-diaria/{{ $rental->vehicle->id }}/{{ $rental->id }}?page=${page}`; // Adiciona o número da página
+
             fetch(apiUrl)
-                .then(response => response.json()) // Converte a resposta para JSON
+                .then(response => response.json())
                 .then(data => {
-                    // Atualiza o conteúdo do modal com os dados da API
                     const resultsContainer = document.getElementById('kmDiariaModalBody');
-                    // Verifica se há dados e exibe
                     if (data && data.data.length > 0) {
-                        let html = '<ul>';
-                        data.data.forEach(item => {
-                            html += `<li>${item.actual_km}</li>`; // Substitua conforme a estrutura da sua resposta
+                        let html = '<ul style="list-style: none; padding: 0;">';
+                        data.data.forEach((item) => {
+                            const formattedDate = new Date(item.created_at).toLocaleDateString('pt-BR');
+                            const collapseId = `collapse-${item.count}`;
+                            html += `
+                        <li class="pb-2" style="margin-bottom: 8px; border-bottom: 1px solid white;" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>${item.count}. ${formattedDate}</span>
+                                <span class="badge rounded-3 fs-6" style="border: 1px solid white;">${item.actual_km}</span>
+                            </div>
+                            <div class="collapse mt-2" id="${collapseId}">
+                                <div class="card card-body" style="background-color: #343a40; color: white;">
+                                    <p><strong>Observação:</strong> ${item.observation ?? 'Sem observações.'}</p>
+                                    <form method="POST" action="/km-diaria/${item.id}" onsubmit="return confirm('Confirma deletar o anexo de ${formattedDate}?');">
+                                        @method('DELETE')
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+
                         });
                         html += '</ul>';
+
+                        // Adiciona controles de paginação corrigidos
+                        html += `
+                    <div class="pagination d-flex justify-content-between align-items-center mt-3">
+                        <button 
+                            class="btn btn-sm btn-secondary" 
+                            ${data.current_page > 1 ? '' : 'disabled'} 
+                            onclick="fetchApiData(${data.current_page - 1})">
+                            Anterior
+                        </button>
+                        <span>Página ${data.current_page} de ${data.last_page}</span>
+                        <button 
+                            class="btn btn-sm btn-secondary" 
+                            ${data.current_page < data.last_page ? '' : 'disabled'} 
+                            onclick="fetchApiData(${data.current_page + 1})">
+                            Próxima
+                        </button>
+                    </div>
+                `;
+
                         resultsContainer.innerHTML = html;
+                        currentPage = page; // Atualiza a página atual
                     } else {
                         resultsContainer.innerHTML = 'Nenhum dado encontrado.';
                     }

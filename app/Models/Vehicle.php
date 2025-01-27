@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
@@ -73,5 +74,10 @@ class Vehicle extends Model
     public function mileageHistory(): HasMany
     {
         return $this->hasMany(MileageHistory::class);
+    }
+
+    public function actualRental(): HasOne
+    {
+        return $this->hasOne(Rental::class)->whereNotNull('finished_at')->latest();
     }
 }

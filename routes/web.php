@@ -34,7 +34,9 @@ Route::get('/veiculos/{vehicle}', [VehicleController::class, 'show'])->middlewar
 Route::delete('/veiculos/{vehicle}', [VehicleController::class, 'destroy'])->middleware(['auth', 'verified'])->name('vehicle.delete');
 Route::patch('/veiculos/{vehicle}', [VehicleController::class, 'update'])->name('vehicle.update');
 
-Route::get('/km-diaria/{vehicle}/{rental?}', [MileageHistoryController::class, 'index'])->middleware(['auth', 'verified'])->name('vehicle.show');
+Route::get('/km-diaria/{vehicle}/{rental?}', [MileageHistoryController::class, 'index'])->middleware(['auth', 'verified'])->name('milleage.show');
+Route::post('/km-diaria/{vehicle}', [MileageHistoryController::class, 'store'])->middleware(['auth', 'verified'])->name('milleage.store');
+Route::delete('/km-diaria/{vehicle}', [MileageHistoryController::class, 'destroy'])->middleware(['auth', 'verified'])->name('milleage.delete');
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
