@@ -114,6 +114,9 @@ class VehicleController extends Controller
     public function destroy(Vehicle $vehicle)
     {
         if($vehicle->user_id === Auth()->user()->id) {
+            if($vehicle->actualRental) {
+                return redirect()->back()->with('error', 'Veículo alugado.');
+            }
             $vehicle->delete();
             return redirect()->route('vehicle.index')->with('error', 'O veículo foi deletado.');
         } else {
