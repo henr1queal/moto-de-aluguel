@@ -16,7 +16,7 @@ return new class extends Migration
             $table->date('date');
             $table->decimal('cost', 10, 2);
             $table->boolean('paid')->default(0);
-            $table->text('observation');
+            $table->text('observation')->nullable();
             $table->foreignUuid('vehicle_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('rental_id')->constrained()->onDelete('cascade');
             $table->timestamps();

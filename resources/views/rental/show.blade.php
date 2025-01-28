@@ -372,7 +372,7 @@
                     <div class="modal-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <small class="text-white">Histório de quilometragem diária</small>
+                                <small class="text-white">Histórico de quilometragem diária</small>
                             </div>
                             <div class="col text-end"><button class="btn btn-primary btn-sm rounded-3 border-white fs-6"
                                     data-bs-toggle="modal" data-bs-target="#criacaokmDiariaModal">Novo anexo</button>
@@ -420,6 +420,88 @@
                 </div>
             </div>
         </div>
+        <!-- Modal listagem Multa-->
+        <div class="modal fade" id="multaModal" tabindex="-1" aria-labelledby="multaModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="background-color: #242424;">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="multaModalLabel">Multa</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <small class="text-white">Histórico de multas</small>
+                            </div>
+                            <div class="col text-end"><button class="btn btn-primary btn-sm rounded-3 border-white fs-6"
+                                    data-bs-toggle="modal" data-bs-target="#criacaoMultaModal">Novo anexo</button>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col" id="multaModalBody">...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal criação Multa-->
+        <div class="modal fade" id="criacaoMultaModal" tabindex="-1" aria-labelledby="criacaoMultaModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="background-color: #242424;">
+                    <form action="{{ route('fine.store', ['vehicle' => $rental->vehicle->id]) }}" method="post">
+                        @csrf
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="criacaoMultaModalLabel">Anexar Multa</h1>
+                            <button type="button" class="btn-close btn-close-white" data-bs-toggle="modal"
+                                data-bs-target="#multa"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col">
+                                    <label for="date" class="form-label fw-light">Data ocorrido<span
+                                            class="text-danger"><strong>*</strong></span></label>
+                                    <input type="date" class="form-control bg-transparent" id="date" required
+                                        name="date">
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">
+                                    <label for="cost" class="form-label fw-light">Valor<span
+                                            class="text-danger"><strong>*</strong></span></label>
+                                    <input type="number" class="form-control bg-transparent" id="cost" required
+                                        name="cost" max="999999">
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">
+                                    <label class="form-label fw-light">Está paga?<span
+                                            class="text-danger"><strong>*</strong></span></label>
+                                    <br>
+                                    <input type="radio" class="btn-check" name="paid" id="success-outlined"
+                                        autocomplete="off" value="1" checked>
+                                    <label class="btn btn-sm btn-outline-success" for="success-outlined">Sim</label>
+
+                                    <input type="radio" class="btn-check" name="paid" id="danger-outlined"
+                                        autocomplete="off" value="0">
+                                    <label class="btn btn-sm btn-outline-danger" for="danger-outlined">Não</label>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">
+                                    <label for="observation" class="form-label fw-light">Observação</label>
+                                    <textarea class="form-control bg-transparent text-white" name="observation" id="observation" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top-0">
+                            <button type="submit" class="btn btn-success w-100 btn-lg">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 @section('options-button')
@@ -433,7 +515,8 @@
             </button>
             <ul class="dropdown-menu p-2 text-center shadow mb-1" style="width: auto; min-width: 70px;">
                 <li>
-                    <a href="#" class="d-block text-decoration-none text-black">
+                    <a data-bs-toggle="modal" data-bs-target="#multaModal" onclick="fetchFineData()"
+                        class="d-block text-decoration-none text-black">
                         <img src="{{ asset('assets/svg/multa.svg') }}" alt="Icon 1" class="img-fluid mx-auto"
                             style="width: 30px; height: auto;">
                         <small class="d-block" style="font-size: 12px;">Multas</small>
@@ -443,7 +526,7 @@
                     <hr class="dropdown-divider">
                 </li>
                 <li>
-                    <a href="#" class="d-block text-decoration-none text-black">
+                    <a class="d-block text-decoration-none text-black">
                         <img src="{{ asset('assets/svg/chave-inglesa.svg') }}" alt="Icon 2" class="img-fluid mx-auto"
                             style="width: 30px; height: auto;">
                         <small class="d-block" style="font-size: 12px;">Manut.</small>
@@ -453,7 +536,7 @@
                     <hr class="dropdown-divider">
                 </li>
                 <li>
-                    <a href="#" class="d-block text-decoration-none text-black">
+                    <a class="d-block text-decoration-none text-black">
                         <span class="fs-2 text-black"><strong>$</strong></span>
                         <small class="d-block" style="font-size: 12px;">Finanças</small>
                     </a>
@@ -462,8 +545,8 @@
                     <hr class="dropdown-divider">
                 </li>
                 <li>
-                    <a href="#" class="d-block text-decoration-none text-black" data-bs-toggle="modal"
-                        data-bs-target="#kmDiariaModal" onclick="fetchApiData()">
+                    <a class="d-block text-decoration-none text-black" data-bs-toggle="modal"
+                        data-bs-target="#kmDiariaModal" onclick="fetchMileageData()">
                         <span class="fs-2 text-black"><strong>KM</strong></span>
                         <small class="d-block" style="font-size: 12px;">KM Diária</small>
                     </a>
@@ -585,7 +668,7 @@
 
         let currentPage = 1; // Página inicial
 
-        function fetchApiData(page = 1) {
+        function fetchMileageData(page = 1) {
             const apiUrl =
                 `/km-diaria/{{ $rental->vehicle->id }}/{{ $rental->id }}?page=${page}`; // Adiciona o número da página
 
@@ -594,46 +677,52 @@
                 .then(data => {
                     const resultsContainer = document.getElementById('kmDiariaModalBody');
                     if (data && data.data.length > 0) {
-                        let html = '<ul style="list-style: none; padding: 0;">';
+                        let html = '';
+
                         data.data.forEach((item) => {
                             const formattedDate = new Date(item.created_at).toLocaleDateString('pt-BR');
                             const collapseId = `collapse-${item.count}`;
+
                             html += `
-                        <li class="pb-2" style="margin-bottom: 8px; border-bottom: 1px solid white;" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span>${item.count}. ${formattedDate}</span>
-                                <span class="badge rounded-3 fs-6" style="border: 1px solid white;">${item.actual_km}</span>
+                        <div class="row mb-3" style="border-bottom: 1px solid white; padding-bottom: 8px;">
+                                <div class="col-12 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
+                                    <span>${item.count}. ${formattedDate}</span>
+                                    <span class="badge rounded-3 fs-6" style="border: 1px solid white;">${item.actual_km}</span>
                             </div>
-                            <div class="collapse mt-2" id="${collapseId}">
-                                <div class="card card-body" style="background-color: #343a40; color: white;">
-                                    <p><strong>Observação:</strong> ${item.observation ?? 'Sem observações.'}</p>
-                                    <form method="POST" action="/km-diaria/${item.id}" onsubmit="return confirm('Confirma deletar o anexo de ${formattedDate}?');">
-                                        @method('DELETE')
-                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                        <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
-                                    </form>
+                        </div>
+
+                        <!-- Collapse correspondente -->
+                        <div class="collapse" id="${collapseId}">
+                            <div class="card card-body" style="background-color: #343a40; color: white;">
+                                <div class="row">
+                                    <div class="col">
+                                        <p><strong>Observação:</strong> ${item.observation ?? 'Sem observações.'}</p>
+                                    </div>
                                 </div>
+                                <form method="POST" action="/multa/${item.id}" onsubmit="return confirm('Confirma deletar o anexo de ${formattedDate}?');">
+                                    @method('DELETE')
+                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                                </form>
                             </div>
-                        </li>
+                        </div>
                     `;
-
                         });
-                        html += '</ul>';
 
-                        // Adiciona controles de paginação corrigidos
+                        // Adiciona controles de paginação
                         html += `
                     <div class="pagination d-flex justify-content-between align-items-center mt-3">
                         <button 
                             class="btn btn-sm btn-secondary" 
                             ${data.current_page > 1 ? '' : 'disabled'} 
-                            onclick="fetchApiData(${data.current_page - 1})">
+                            onclick="fetchFineData(${data.current_page - 1})">
                             Anterior
                         </button>
                         <span>Página ${data.current_page} de ${data.last_page}</span>
                         <button 
                             class="btn btn-sm btn-secondary" 
                             ${data.current_page < data.last_page ? '' : 'disabled'} 
-                            onclick="fetchApiData(${data.current_page + 1})">
+                            onclick="fetchFineData(${data.current_page + 1})">
                             Próxima
                         </button>
                     </div>
@@ -647,9 +736,130 @@
                 })
                 .catch(error => {
                     console.error('Erro ao buscar dados:', error);
-                    const resultsContainer = document.getElementById('kmDiariaModalBody');
+                    const resultsContainer = document.getElementById('multaModalBody');
                     resultsContainer.innerHTML = 'Erro ao carregar os dados.';
                 });
+        }
+
+        function fetchFineData(page = 1) {
+            const apiUrl =
+                `/multa/{{ $rental->vehicle->id }}/{{ $rental->id }}?page=${page}`; // Adiciona o número da página
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsContainer = document.getElementById('multaModalBody');
+                    if (data && data.data.length > 0) {
+                        let html = '';
+
+                        data.data.forEach((item) => {
+                            const formattedDate = new Date(item.created_at).toLocaleDateString('pt-BR');
+                            const collapseId = `collapse-${item.count}`;
+
+                            html += `
+                        <div class="row mb-3" style="border-bottom: 1px solid white; padding-bottom: 8px;">
+                            <!-- Entrada principal -->
+                            <div class="col-12 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
+                                <span>${item.count}. ${formattedDate} - R$ ${item.cost}</span>
+                                <span class="badge rounded-3 fs-6 ${item.paid == 1 ? 'text-bg-success' : 'text-bg-danger'}">${item.paid == 1 ? 'Pago' : 'Não pago'}</span>
+                            </div>
+                        </div>
+
+                        <!-- Collapse correspondente -->
+                        <div class="collapse" id="${collapseId}">
+                            <div class="card card-body" style="background-color: #343a40; color: white;">
+                                <div class="row">
+                                    <div class="col">
+                                        <p><strong>Observação:</strong> ${item.observation ?? 'Sem observações.'}</p>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked-${item.id}" ${item.paid == 1 ? 'checked' : ''} onchange="togglePaidStatus('${item.id}')">
+                                            <label class="form-check-label" for="flexSwitchCheckChecked-${item.id}">Pago</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <form method="POST" action="/multa/${item.id}" onsubmit="return confirm('Confirma deletar o anexo de ${formattedDate}?');">
+                                    @method('DELETE')
+                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                                </form>
+                            </div>
+                        </div>
+                    `;
+                        });
+
+                        // Adiciona controles de paginação
+                        html += `
+                    <div class="pagination d-flex justify-content-between align-items-center mt-3">
+                        <button 
+                            class="btn btn-sm btn-secondary" 
+                            ${data.current_page > 1 ? '' : 'disabled'} 
+                            onclick="fetchFineData(${data.current_page - 1})">
+                            Anterior
+                        </button>
+                        <span>Página ${data.current_page} de ${data.last_page}</span>
+                        <button 
+                            class="btn btn-sm btn-secondary" 
+                            ${data.current_page < data.last_page ? '' : 'disabled'} 
+                            onclick="fetchFineData(${data.current_page + 1})">
+                            Próxima
+                        </button>
+                    </div>
+                `;
+
+                        resultsContainer.innerHTML = html;
+                        currentPage = page; // Atualiza a página atual
+                    } else {
+                        resultsContainer.innerHTML = 'Nenhum dado encontrado.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar dados:', error);
+                    const resultsContainer = document.getElementById('multaModalBody');
+                    resultsContainer.innerHTML = 'Erro ao carregar os dados.';
+                });
+        }
+
+        async function togglePaidStatus(itemId) {
+            const checkbox = document.getElementById(`flexSwitchCheckChecked-${itemId}`);
+            const previousState = checkbox.checked;
+
+            if (confirm('Deseja mudar o status da multa?')) {
+                try {
+                    const response = await fetch(`/multa/${itemId}`, {
+                        method: 'put',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}' // Adicionar token CSRF para segurança
+                        },
+                        body: JSON.stringify({
+                            paid: checkbox.checked,
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erro ao atualizar o status');
+                    } else {
+                        if(previousState) {
+                            alert('Multa paga!')
+                            window.location.reload()
+                        } else {
+                            alert('Multa não paga!')
+                            window.location.reload()
+
+                        }
+                    }
+                    // Se a requisição for bem-sucedida, não precisamos fazer nada, o estado já está atualizado
+                } catch (error) {
+                    console.error('Erro:', error);
+                    // Reverte o estado do checkbox em caso de erro
+                    checkbox.checked = !previousState;
+                }
+            } else {
+                checkbox.checked = !previousState;
+            }
         }
     </script>
 @endsection

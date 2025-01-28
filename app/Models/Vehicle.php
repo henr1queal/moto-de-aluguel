@@ -78,6 +78,6 @@ class Vehicle extends Model
 
     public function actualRental(): HasOne
     {
-        return $this->hasOne(Rental::class)->whereNotNull('finished_at')->latest();
+        return $this->hasOne(Rental::class)->whereNull('finished_at')->latest();
     }
 }
