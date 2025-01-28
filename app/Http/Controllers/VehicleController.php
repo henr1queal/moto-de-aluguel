@@ -60,6 +60,7 @@ class VehicleController extends Controller
      */
     public function show(Vehicle $vehicle)
     {
+        $vehicle->load('actualRental');
         return view('vehicle.show', compact('vehicle'));
     }
 

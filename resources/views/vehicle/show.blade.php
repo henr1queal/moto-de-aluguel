@@ -44,6 +44,11 @@
         <div class="row g-0">
             <div class="col text-center">
                 <h1 style="font-size: 20px;">Visualizando moto</h1>
+                @if(!$vehicle->actualRental)
+                <small class="text-success">DISPONÍVEL</small>
+                @else
+                <small class="text-warning">ALUGADA</small>
+                @endif
             </div>
         </div>
         <div class="row mt-4 g-3">
