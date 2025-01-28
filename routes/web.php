@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\FineController;
+use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\MileageHistoryController;
+use App\Http\Controllers\OilChangeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\VehicleController;
+use App\Models\OilChange;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -39,9 +42,15 @@ Route::get('/km-diaria/{vehicle}/{rental?}', [MileageHistoryController::class, '
 Route::post('/km-diaria/{vehicle}', [MileageHistoryController::class, 'store'])->middleware(['auth', 'verified'])->name('milleage.store');
 Route::delete('/km-diaria/{vehicle}', [MileageHistoryController::class, 'destroy'])->middleware(['auth', 'verified'])->name('milleage.delete');
 
-Route::put('/multa/{fine}', [FineController::class, 'update'])->middleware(['auth', 'verified'])->name('fine.update');
+Route::get('/manutencao/{vehicle}/{rental?}', [MaintenanceController::class, 'index'])->middleware(['auth', 'verified'])->name('maintenance.show');
+Route::post('/manutencao/{vehicle}', [MaintenanceController::class, 'store'])->middleware(['auth', 'verified'])->name('maintenance.store');
+Route::delete('/manutencao/{vehicle}', [MaintenanceController::class, 'destroy'])->middleware(['auth', 'verified'])->name('maintenance.delete');
 
-// Depois as outras rotas
+Route::get('/troca-de-oleo/{vehicle}/{rental?}', [OilChangeController::class, 'index'])->middleware(['auth', 'verified'])->name('oil-change.show');
+Route::post('/troca-de-oleo/{vehicle}', [OilChangeController::class, 'store'])->middleware(['auth', 'verified'])->name('oil-change.store');
+Route::delete('/troca-de-oleo/{vehicle}', [OilChangeController::class, 'destroy'])->middleware(['auth', 'verified'])->name('oil-change.delete');
+
+Route::put('/multa/{fine}', [FineController::class, 'update'])->middleware(['auth', 'verified'])->name('fine.update');
 Route::post('/multa/{vehicle}', [FineController::class, 'store'])->middleware(['auth', 'verified'])->name('fine.store');
 Route::delete('/multa/{vehicle}', [FineController::class, 'destroy'])->middleware(['auth', 'verified'])->name('fine.delete');
 Route::get('/multa/{vehicle}/{rental?}', [FineController::class, 'index'])->middleware(['auth', 'verified'])->name('fine.show');

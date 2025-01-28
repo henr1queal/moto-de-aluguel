@@ -321,11 +321,11 @@
                             class="text-danger"><strong>*</strong></span></label>
                     @error('deposit')
                         <input type="text" class="form-control bg-transparent border-danger" id="deposit"
-                            value="{{ old('deposit') }}" required name="deposit" maxlength="6">
+                            value="{{ old('deposit') }}" required name="deposit" maxlength="6" disabled readonly>
                         <small class="very-small text-danger">Apenas números</small>
                     @else
                         <input type="text" class="form-control bg-transparent" id="deposit"
-                            value="{{ $rental->deposit ?? null }}" required name="deposit" maxlength="6">
+                            value="{{ $rental->deposit ?? null }}" required name="deposit" maxlength="6" disabled readonly>
                     @enderror
                 </div>
             </div>
@@ -360,8 +360,8 @@
             </div>
         </form>
         <!-- Modal listagem KM Diária-->
-        <div class="modal fade" id="kmDiariaModal" tabindex="-1" aria-labelledby="kmDiariaModalLabel"
-            aria-hidden="true">
+        <div aria-modal="true" class="modal fade" id="kmDiariaModal" tabindex="-1"
+            aria-labelledby="kmDiariaModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content" style="background-color: #242424;">
                     <div class="modal-header">
@@ -372,7 +372,7 @@
                     <div class="modal-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <small class="text-white">Histórico de quilometragem diária</small>
+                                <small class="text-white"><strong>Histórico de quilometragem diária:</strong></small>
                             </div>
                             <div class="col text-end"><button class="btn btn-primary btn-sm rounded-3 border-white fs-6"
                                     data-bs-toggle="modal" data-bs-target="#criacaokmDiariaModal">Novo anexo</button>
@@ -386,8 +386,8 @@
             </div>
         </div>
         <!-- Modal criação KM Diária-->
-        <div class="modal fade" id="criacaokmDiariaModal" tabindex="-1" aria-labelledby="criacaokmDiariaModalLabel"
-            aria-hidden="true">
+        <div aria-modal="true" class="modal fade" id="criacaokmDiariaModal" tabindex="-1"
+            aria-labelledby="criacaokmDiariaModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content" style="background-color: #242424;">
                     <form action="{{ route('milleage.store', ['vehicle' => $rental->vehicle->id]) }}" method="post">
@@ -400,16 +400,166 @@
                         <div class="modal-body">
                             <div class="row">
                                 <div class="col">
-                                    <label for="actual_km" class="form-label fw-light">KM Atual<span
+                                    <label for="actual_km_mileage" class="form-label fw-light">KM Atual<span
                                             class="text-danger"><strong>*</strong></span></label>
-                                    <input type="number" class="form-control bg-transparent" id="actual_km" required
-                                        name="actual_km" max="999999">
+                                    <input type="number" class="form-control bg-transparent" id="actual_km_mileage"
+                                        required name="actual_km" max="999999">
                                 </div>
                             </div>
                             <div class="row mt-3">
                                 <div class="col">
-                                    <label for="observation" class="form-label fw-light">Observação</label>
-                                    <textarea class="form-control bg-transparent text-white" name="observation" id="observation" rows="2"></textarea>
+                                    <label for="observation_mileage" class="form-label fw-light">Observação</label>
+                                    <textarea class="form-control bg-transparent text-white" name="observation" id="observation_mileage" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top-0">
+                            <button type="submit" class="btn btn-success w-100 btn-lg">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Modal listagem Manutenção-->
+        <div aria-modal="true" class="modal fade" id="manutencaoModal" tabindex="-1"
+            aria-labelledby="manutencaoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="background-color: #242424;">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="manutencaoModalLabel">Manutenção/Troca de óleo</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <small class="text-white"><strong>Histórico de manutenções:</strong></small>
+                            </div>
+                            <div class="col text-end"><button class="btn btn-primary btn-sm rounded-3 border-white fs-6"
+                                    data-bs-toggle="modal" data-bs-target="#criacaoManutencaoModal">Nova manutenção</button>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col" id="manutencaoModalBody">...</div>
+                        </div>
+                        <hr class="border-success my-4 opacity-100">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <small class="text-white"><strong>Histórico de trocas de óleo:</strong></small>
+                            </div>
+                            <div class="col text-end"><button class="btn btn-primary btn-sm rounded-3 border-white fs-6"
+                                    data-bs-toggle="modal" data-bs-target="#criacaoTrocaDeOleoModal">Nova troca de óleo</button>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col" id="trocaDeOleoModalBody">...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal criação Manutenção-->
+        <div aria-modal="true" class="modal fade" id="criacaoManutencaoModal" tabindex="-1"
+            aria-labelledby="criacaoManutencaoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="background-color: #242424;">
+                    <form action="{{ route('maintenance.store', ['vehicle' => $rental->vehicle->id]) }}" method="post">
+                        @csrf
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="criacaoManutencaoModalLabel">Anexar Manutenção</h1>
+                            <button type="button" class="btn-close btn-close-white" data-bs-toggle="modal"
+                                data-bs-target="#manutencaoModal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col">
+                                    <label for="cost_maintenance" class="form-label fw-light">Valor<span
+                                            class="text-danger"><strong>*</strong></span></label>
+                                    <input type="number" class="form-control bg-transparent" id="cost_maintenance"
+                                        required name="cost" max="999999">
+                                </div>
+                                <div class="col">
+                                    <label for="date_maintenance" class="form-label fw-light">Data<span
+                                            class="text-danger"><strong>*</strong></span></label>
+                                    <input type="date" class="form-control bg-transparent" id="date_maintenance"
+                                        required name="date" max="999999">
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">
+                                    <label for="actual_km_maintenance" class="form-label fw-light">KM Atual<span
+                                            class="text-danger"><strong>*</strong></span></label>
+                                    <input type="number" class="form-control bg-transparent" id="actual_km_maintenance"
+                                        required name="actual_km" max="999999">
+                                </div>
+                                <div class="col">
+                                    <label class="form-label fw-light">Houve troca de óleo?<span
+                                            class="text-danger"><strong>*</strong></span></label>
+                                    <br>
+                                    <input type="radio" class="btn-check" name="have_oil_change" id="success-outlined"
+                                        autocomplete="off" value="1">
+                                    <label class="btn btn-sm btn-outline-success" for="success-outlined">Sim</label>
+    
+                                    <input type="radio" class="btn-check" name="have_oil_change" id="danger-outlined"
+                                        autocomplete="off" value="0" checked>
+                                    <label class="btn btn-sm btn-outline-danger" for="danger-outlined">Não</label>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">
+                                    <label for="observation_maintenance" class="form-label fw-light">Observação</label>
+                                    <textarea class="form-control bg-transparent text-white" name="observation" id="observation_maintenance"
+                                        rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top-0">
+                            <button type="submit" class="btn btn-success w-100 btn-lg">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Modal troca de óleo-->
+        <div aria-modal="true" class="modal fade" id="criacaoTrocaDeOleoModal" tabindex="-1"
+            aria-labelledby="criacaoTrocaDeOleoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="background-color: #242424;">
+                    <form action="{{ route('oil-change.store', ['vehicle' => $rental->vehicle->id]) }}" method="post">
+                        @csrf
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="criacaoTrocaDeOleoModalLabel">Anexar Troca de Óleo</h1>
+                            <button type="button" class="btn-close btn-close-white" data-bs-toggle="modal"
+                                data-bs-target="#manutencaoModal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col">
+                                    <label for="cost_oil_change" class="form-label fw-light">Valor<span
+                                            class="text-danger"><strong>*</strong></span></label>
+                                    <input type="number" class="form-control bg-transparent" id="cost_oil_change"
+                                        required name="cost" max="999999">
+                                </div>
+                                <div class="col">
+                                    <label for="date_oil_change" class="form-label fw-light">Data<span
+                                            class="text-danger"><strong>*</strong></span></label>
+                                    <input type="date" class="form-control bg-transparent" id="date_oil_change"
+                                        required name="date">
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">
+                                    <label for="actual_km_oil_change" class="form-label fw-light">KM Atual<span
+                                            class="text-danger"><strong>*</strong></span></label>
+                                    <input type="number" class="form-control bg-transparent" id="actual_km_oil_change"
+                                        required name="actual_km" max="999999">
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">
+                                    <label for="observation_oil_change" class="form-label fw-light">Observação</label>
+                                    <textarea class="form-control bg-transparent text-white" name="observation" id="observation_oil_change"
+                                        rows="2"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -421,7 +571,8 @@
             </div>
         </div>
         <!-- Modal listagem Multa-->
-        <div class="modal fade" id="multaModal" tabindex="-1" aria-labelledby="multaModalLabel" aria-hidden="true">
+        <div aria-modal="true" class="modal fade" id="multaModal" tabindex="-1" aria-labelledby="multaModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content" style="background-color: #242424;">
                     <div class="modal-header">
@@ -432,7 +583,7 @@
                     <div class="modal-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <small class="text-white">Histórico de multas</small>
+                                <small class="text-white"><strong>Histórico de multas:</strong></small>
                             </div>
                             <div class="col text-end"><button class="btn btn-primary btn-sm rounded-3 border-white fs-6"
                                     data-bs-toggle="modal" data-bs-target="#criacaoMultaModal">Novo anexo</button>
@@ -446,8 +597,8 @@
             </div>
         </div>
         <!-- Modal criação Multa-->
-        <div class="modal fade" id="criacaoMultaModal" tabindex="-1" aria-labelledby="criacaoMultaModalLabel"
-            aria-hidden="true">
+        <div aria-modal="true" class="modal fade" id="criacaoMultaModal" tabindex="-1"
+            aria-labelledby="criacaoMultaModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content" style="background-color: #242424;">
                     <form action="{{ route('fine.store', ['vehicle' => $rental->vehicle->id]) }}" method="post">
@@ -460,17 +611,17 @@
                         <div class="modal-body">
                             <div class="row">
                                 <div class="col">
-                                    <label for="date" class="form-label fw-light">Data ocorrido<span
+                                    <label for="date_fine" class="form-label fw-light">Data ocorrido<span
                                             class="text-danger"><strong>*</strong></span></label>
-                                    <input type="date" class="form-control bg-transparent" id="date" required
+                                    <input type="date" class="form-control bg-transparent" id="date_fine" required
                                         name="date">
                                 </div>
                             </div>
                             <div class="row mt-3">
                                 <div class="col">
-                                    <label for="cost" class="form-label fw-light">Valor<span
+                                    <label for="cost_fine" class="form-label fw-light">Valor<span
                                             class="text-danger"><strong>*</strong></span></label>
-                                    <input type="number" class="form-control bg-transparent" id="cost" required
+                                    <input type="number" class="form-control bg-transparent" id="cost_fine" required
                                         name="cost" max="999999">
                                 </div>
                             </div>
@@ -526,7 +677,8 @@
                     <hr class="dropdown-divider">
                 </li>
                 <li>
-                    <a class="d-block text-decoration-none text-black">
+                    <a data-bs-toggle="modal" data-bs-target="#manutencaoModal"
+                        onclick="fetchMaintenanceAndOilChangeData()" class="d-block text-decoration-none text-black">
                         <img src="{{ asset('assets/svg/chave-inglesa.svg') }}" alt="Icon 2" class="img-fluid mx-auto"
                             style="width: 30px; height: auto;">
                         <small class="d-block" style="font-size: 12px;">Manut.</small>
@@ -692,7 +844,7 @@
                         </div>
 
                         <!-- Collapse correspondente -->
-                        <div class="collapse" id="${collapseId}">
+                        <div class="collapse mb-3" id="${collapseId}">
                             <div class="card card-body" style="background-color: #343a40; color: white;">
                                 <div class="row">
                                     <div class="col">
@@ -741,6 +893,94 @@
                 });
         }
 
+        function fetchMaintenanceAndOilChangeData() {
+            const maintenanceApiUrl = `/manutencao/{{ $rental->vehicle->id }}/{{ $rental->id }}?page=1`;
+            const oilChangeApiUrl = `/troca-de-oleo/{{ $rental->vehicle->id }}/{{ $rental->id }}?page=1`;
+
+            // Executa as duas requisições simultaneamente
+            Promise.all([
+                    fetch(maintenanceApiUrl).then(response => response.json()),
+                    fetch(oilChangeApiUrl).then(response => response.json())
+                ])
+                .then(([maintenanceData, oilChangeData]) => {
+                    // Atualiza a seção de Manutenção
+                    updateModalSection('manutencaoModalBody', maintenanceData, 'Manutenção');
+
+                    // Atualiza a seção de Troca de Óleo
+                    updateModalSection('trocaDeOleoModalBody', oilChangeData, 'Troca de Óleo');
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar dados:', error);
+                    document.getElementById('manutencaoModalBody').innerHTML =
+                        'Erro ao carregar os dados de manutenção.';
+                    document.getElementById('trocaDeOleoModalBody').innerHTML =
+                        'Erro ao carregar os dados de troca de óleo.';
+                });
+        }
+
+        function updateModalSection(containerId, data, sectionTitle) {
+            const resultsContainer = document.getElementById(containerId);
+
+            if (data && data.data.length > 0) {
+                let html = '';
+
+                data.data.forEach((item) => {
+                    const formattedDate = new Date(item.date).toLocaleDateString('pt-BR');
+                    const collapseId = `collapse-${item.id}`;
+
+                    html += `
+                <div class="row mb-3" style="border-bottom: 1px solid white; padding-bottom: 8px;">
+                    <div class="col-12 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
+                        <span>${item.count}. ${formattedDate}</span>
+                        <span class="badge rounded-3 fs-6" style="border: 1px solid white;">R$ ${item.cost}</span>
+                    </div>
+                </div>
+
+                <!-- Collapse correspondente -->
+                <div class="collapse mb-3" id="${collapseId}">
+                    <div class="card card-body" style="background-color: #343a40; color: white;">
+                        <div class="row">
+                            <div class="col">
+                                <p><strong>Quilometragem da moto:</strong> ${item.actual_km ?? 'Sem observações.'}</p>
+                                <p><strong>Houve troca de óleo:</strong> ${item.have_oil_change === 1 ? 'Sim' : 'Não'}</p>
+                                <p><strong>Observação:</strong> ${item.observation ?? 'Sem observações.'}</p>
+                            </div>
+                        </div>
+                        <form method="POST" action="/${sectionTitle === 'Manutenção' ? 'manutencao' : 'troca-de-oleo'}/${item.id}" onsubmit="return confirm('Confirma deletar a ${sectionTitle.toLowerCase()} de ${formattedDate}?');">
+                            @method('DELETE')
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+                });
+
+                // Adiciona controles de paginação
+                html += `
+            <div class="pagination d-flex justify-content-between align-items-center mt-3">
+                <button 
+                    class="btn btn-sm btn-secondary" 
+                    ${data.current_page > 1 ? '' : 'disabled'} 
+                    onclick="fetchMaintenanceData(${data.current_page - 1})">
+                    Anterior
+                </button>
+                <span>Página ${data.current_page} de ${data.last_page}</span>
+                <button 
+                    class="btn btn-sm btn-secondary" 
+                    ${data.current_page < data.last_page ? '' : 'disabled'} 
+                    onclick="fetchMaintenanceData(${data.current_page + 1})">
+                    Próxima
+                </button>
+            </div>
+        `;
+
+                resultsContainer.innerHTML = html;
+            } else {
+                resultsContainer.innerHTML = `Nenhum dado encontrado.`;
+            }
+        }
+
         function fetchFineData(page = 1) {
             const apiUrl =
                 `/multa/{{ $rental->vehicle->id }}/{{ $rental->id }}?page=${page}`; // Adiciona o número da página
@@ -766,7 +1006,7 @@
                         </div>
 
                         <!-- Collapse correspondente -->
-                        <div class="collapse" id="${collapseId}">
+                        <div class="collapse mb-3" id="${collapseId}">
                             <div class="card card-body" style="background-color: #343a40; color: white;">
                                 <div class="row">
                                     <div class="col">
@@ -779,7 +1019,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <form method="POST" action="/multa/${item.id}" onsubmit="return confirm('Confirma deletar o anexo de ${formattedDate}?');">
+                                <form method="POST" action="/multa/${item.id}" onsubmit="return confirm('Confirma deletar a multa de ${formattedDate}?');">
                                     @method('DELETE')
                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
@@ -842,7 +1082,7 @@
                     if (!response.ok) {
                         throw new Error('Erro ao atualizar o status');
                     } else {
-                        if(previousState) {
+                        if (previousState) {
                             alert('Multa paga!')
                             window.location.reload()
                         } else {
