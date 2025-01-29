@@ -57,23 +57,22 @@ class OilChangeController extends Controller
             $validated['rental_id'] = $actualRental->id;
         }
 
-        try {
-            OilChange::create($validated);
-            return redirect()->back()->with('success', 'Adicionado com sucesso!');
-        } catch (\Throwable $th) {
-            Log::info('Erro ao adicionar troca de óleo', ['erro' => $th->getMessage()]);
-        }
+        OilChange::create($validated);
+        $vehicle->actual_km = $validated['actual_km'];
+        $vehicle->save();
+        
+        return redirect()->back()->with('success', 'Adicionado com sucesso!');
     }
-    
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy($Maintenance)
     {
-        $Maintenance = OilChange::where('id', $Maintenance)->whereHas('vehicle', function($query){
+        $Maintenance = OilChange::where('id', $Maintenance)->whereHas('vehicle', function ($query) {
             $query->where('user_id', Auth()->id());
         })->delete();
-        if($Maintenance) {
+        if ($Maintenance) {
             return redirect()->back()->with('success', 'Troca de óleo deletada.');
         };
         return redirect()->back()->with('error', 'Selecione uma troca de óleo existente.');

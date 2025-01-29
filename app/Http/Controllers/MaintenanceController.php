@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Maintenance;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -43,26 +42,25 @@ class MaintenanceController extends Controller
      */
     public function store(Request $request, Vehicle $vehicle)
     {
-        try {
-            $validated = $this->validateStoreData($request);
+        $validated = $this->validateStoreData($request);
 
-            $validated['vehicle_id'] = $vehicle->id;
+        $validated['vehicle_id'] = $vehicle->id;
 
-            if ($vehicle->user_id !== Auth()->id()) {
-                return response()->json(['error' => 'Selecione um veículo existente.'], 400);
-            }
-
-            $actualRental = $vehicle->actualRental()->select('id', 'vehicle_id', 'finished_at')->first();
-
-            if ($actualRental) {
-                $validated['rental_id'] = $actualRental->id;
-            }
-
-            Maintenance::create($validated);
-            return redirect()->back()->with('success', 'Adicionado com sucesso!');
-        } catch (\Throwable $th) {
-            dd($th->getMessage());
+        if ($vehicle->user_id !== Auth()->id()) {
+            return response()->json(['error' => 'Selecione um veículo existente.'], 400);
         }
+
+        $actualRental = $vehicle->actualRental()->select('id', 'vehicle_id', 'finished_at')->first();
+
+        if ($actualRental) {
+            $validated['rental_id'] = $actualRental->id;
+        }
+
+        Maintenance::create($validated);
+        $vehicle->actual_km = $validated['actual_km'];
+        $vehicle->save();
+        
+        return redirect()->back()->with('success', 'Adicionado com sucesso!');
     }
 
     /**

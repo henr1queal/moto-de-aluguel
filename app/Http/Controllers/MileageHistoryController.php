@@ -49,23 +49,22 @@ class MileageHistoryController extends Controller
             $validated['rental_id'] = $actualRental->id;
         }
 
-        try {
-            MileageHistory::create($validated);
-            return redirect()->back()->with('success', 'Adicionado com sucesso!');
-        } catch (\Throwable $th) {
-            Log::info('Erro ao adicionar KM Diária', ['erro' => $th->getMessage()]);
-        }
+        MileageHistory::create($validated);
+        $vehicle->actual_km = $validated['actual_km'];
+        $vehicle->save();
+        
+        return redirect()->back()->with('success', 'Adicionado com sucesso!');
     }
-    
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy($mileageHistory)
     {
-        $mileageHistory = MileageHistory::where('id', $mileageHistory)->whereHas('vehicle', function($query){
+        $mileageHistory = MileageHistory::where('id', $mileageHistory)->whereHas('vehicle', function ($query) {
             $query->where('user_id', Auth()->id());
         })->delete();
-        if($mileageHistory) {
+        if ($mileageHistory) {
             return redirect()->back()->with('success', 'Quilometragem do dia deletada.');
         };
         return redirect()->back()->with('error', 'Selecione uma entrada existente.');
