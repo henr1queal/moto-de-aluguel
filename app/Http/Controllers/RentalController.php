@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Maintenance;
+use App\Models\OilChange;
 use App\Models\Rental;
 use App\Models\Vehicle;
 use Carbon\Carbon;
@@ -70,7 +72,7 @@ class RentalController extends Controller
      */
     public function show(Rental $rental)
     {
-        $rental->load('vehicle');
+        $rental->load(['vehicle.latestMaintenance', 'vehicle.latestOilChange']);
         return view('rental.show', compact('rental'));
     }
 

@@ -80,4 +80,14 @@ class Vehicle extends Model
     {
         return $this->hasOne(Rental::class)->whereNull('finished_at')->latest();
     }
+    
+    public function latestMaintenance(): HasOne
+    {
+        return $this->hasOne(Maintenance::class)->orderByDesc('date')->latest();
+    }
+    
+    public function latestOilChange(): HasOne
+    {
+        return $this->hasOne(OilChange::class)->orderByDesc('date')->latest();
+    }
 }

@@ -167,6 +167,52 @@
                                 <div id="emailHelp" class="form-text text-secondary">Quilômetros</div>
                             @enderror
                         </div>
+                        <div class="col-12 mt-2">
+                            <small><strong>Última revisão:</strong></small>
+                            @if ($vehicle->latestMaintenance)
+                                <small>{{ date('d/m/Y', strtotime($vehicle->latestMaintenance->date)) }}.</small>
+                            @else
+                                <small>N/A</small>
+                            @endif
+                            @php
+                                $latestMaintenanceKm = $vehicle->latestMaintenance->actual_km ?? 0;
+                                $revisionPeriod = $vehicle->revision_period; // Período de revisão em km
+                                $actualKm = $vehicle->actual_km; // Quilometragem atual do veículo
+                                $nextMaintenanceKm = $latestMaintenanceKm + $revisionPeriod; // Quilometragem para a próxima revisão
+                                $kmRemaining = $nextMaintenanceKm - $actualKm;
+                            @endphp
+                            <br><small><strong>Próxima revisão:</strong> <span
+                                    class="@if ($kmRemaining < 0) text-danger @else text-success @endif">{{ $kmRemaining }}</span>
+                                KM.</small>
+                            <br><small><strong>Última troca de óleo:</strong></small>
+                            @if ($vehicle->latestOilChange)
+                                <small>{{ date('d/m/Y', strtotime($vehicle->latestOilChange->date)) }}.</small>
+                            @else
+                                <small>N/A</small>
+                            @endif
+                            <br><small><strong>Próxima troca de óleo:</strong></small>
+                            @php
+                                // Cálculo para a próxima troca de óleo
+                                $oilPeriod = $vehicle->oil_period; // Período de troca de óleo em km
+                                $latestOilChangeKm = 0; // Inicializa a quilometragem da última troca de óleo
+
+                                if ($vehicle->latestMaintenance) {
+                                    if ($vehicle->latestMaintenance->have_oil_change == 1) {
+                                        // Se a última manutenção incluiu troca de óleo
+                                        $latestOilChangeKm = $vehicle->latestMaintenance->actual_km;
+                                    } else {
+                                        // Se a última manutenção não incluiu troca de óleo, verifica o latestOilChange
+                                        $latestOilChangeKm = $vehicle->latestOilChange->actual_km ?? 0;
+                                    }
+                                }
+                                $nextOilChangeKm = $latestOilChangeKm + $oilPeriod; // Quilometragem para a próxima troca de óleo
+                                $oilKmRemaining = $nextOilChangeKm - $actualKm; // Quilômetros restantes para a troca de óleo
+                            @endphp
+                            <small>
+                                <span
+                                    class="@if ($oilKmRemaining < 0) text-danger @else text-success @endif">{{ $oilKmRemaining }}</span>
+                                KM.</small>
+                        </div>
                     </div>
                     <div class="row g-3 mt-5 mb-5">
                         <div class="col mt-0 text-center">

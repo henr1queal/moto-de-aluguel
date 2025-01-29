@@ -290,7 +290,7 @@
                         @enderror
                     </div>
                     <div class="mt-4"><small><strong>Dados sobre o veículo:</strong></small></div>
-                    <div class="row g-3 mt-3">
+                    <div class="row g-3 mt-3 align-items-center">
                         <div class="col-auto text-center mt-0">
                             <div class="vehicle rounded-3 py-2 px-3">
                                 <small>{{ $rental->vehicle->brand }} {{ $rental->vehicle->model }}</small>
@@ -298,6 +298,52 @@
                                 <br><small>KM: {{ $rental->vehicle->actual_km }}</small>
                                 <br><small>ANO: {{ $rental->vehicle->year }}</small>
                             </div>
+                        </div>
+                        <div class="col mt-0 p-0">
+                            <small><strong>Última revisão:</strong></small>
+                            @if ($rental->vehicle->latestMaintenance)
+                                <small>{{ date('d/m/Y', strtotime($rental->vehicle->latestMaintenance->date)) }}.</small>
+                            @else
+                                <small>N/A</small>
+                            @endif
+                            @php
+                                $latestMaintenanceKm = $rental->vehicle->latestMaintenance->actual_km ?? 0;
+                                $revisionPeriod = $rental->vehicle->revision_period; // Período de revisão em km
+                                $actualKm = $rental->vehicle->actual_km; // Quilometragem atual do veículo
+                                $nextMaintenanceKm = $latestMaintenanceKm + $revisionPeriod; // Quilometragem para a próxima revisão
+                                $kmRemaining = $nextMaintenanceKm - $actualKm;
+                            @endphp
+                            <br><small><strong>Próxima revisão:</strong> <span
+                                    class="@if ($kmRemaining < 0) text-danger @else text-success @endif">{{ $kmRemaining }}</span>
+                                KM.</small>
+                            <br><small><strong>Última troca de óleo:</strong></small>
+                            @if ($rental->vehicle->latestOilChange)
+                                <small>{{ date('d/m/Y', strtotime($rental->vehicle->latestOilChange->date)) }}.</small>
+                            @else
+                                <small>N/A</small>
+                            @endif
+                            <br><small><strong>Próxima troca de óleo:</strong></small>
+                            @php
+                                // Cálculo para a próxima troca de óleo
+                                $oilPeriod = $rental->vehicle->oil_period; // Período de troca de óleo em km
+                                $latestOilChangeKm = 0; // Inicializa a quilometragem da última troca de óleo
+
+                                if ($rental->vehicle->latestMaintenance) {
+                                    if ($rental->vehicle->latestMaintenance->have_oil_change == 1) {
+                                        // Se a última manutenção incluiu troca de óleo
+                                        $latestOilChangeKm = $rental->vehicle->latestMaintenance->actual_km;
+                                    } else {
+                                        // Se a última manutenção não incluiu troca de óleo, verifica o latestOilChange
+                                        $latestOilChangeKm = $rental->vehicle->latestOilChange->actual_km ?? 0;
+                                    }
+                                }
+                                $nextOilChangeKm = $latestOilChangeKm + $oilPeriod; // Quilometragem para a próxima troca de óleo
+                                $oilKmRemaining = $nextOilChangeKm - $actualKm; // Quilômetros restantes para a troca de óleo
+                            @endphp
+                            <small>
+                                <span
+                                    class="@if ($oilKmRemaining < 0) text-danger @else text-success @endif">{{ $oilKmRemaining }}</span>
+                                KM.</small>
                         </div>
                     </div>
                 </div>
@@ -436,7 +482,8 @@
                                 <small class="text-white"><strong>Histórico de manutenções:</strong></small>
                             </div>
                             <div class="col text-end"><button class="btn btn-primary btn-sm rounded-3 border-white fs-6"
-                                    data-bs-toggle="modal" data-bs-target="#criacaoManutencaoModal">Nova manutenção</button>
+                                    data-bs-toggle="modal" data-bs-target="#criacaoManutencaoModal">Nova
+                                    manutenção</button>
                             </div>
                         </div>
                         <div class="row mt-4">
@@ -448,7 +495,8 @@
                                 <small class="text-white"><strong>Histórico de trocas de óleo:</strong></small>
                             </div>
                             <div class="col text-end"><button class="btn btn-primary btn-sm rounded-3 border-white fs-6"
-                                    data-bs-toggle="modal" data-bs-target="#criacaoTrocaDeOleoModal">Nova troca de óleo</button>
+                                    data-bs-toggle="modal" data-bs-target="#criacaoTrocaDeOleoModal">Nova troca de
+                                    óleo</button>
                             </div>
                         </div>
                         <div class="row mt-4">
@@ -499,7 +547,7 @@
                                     <input type="radio" class="btn-check" name="have_oil_change" id="success-outlined"
                                         autocomplete="off" value="1">
                                     <label class="btn btn-sm btn-outline-success" for="success-outlined">Sim</label>
-    
+
                                     <input type="radio" class="btn-check" name="have_oil_change" id="danger-outlined"
                                         autocomplete="off" value="0" checked>
                                     <label class="btn btn-sm btn-outline-danger" for="danger-outlined">Não</label>
