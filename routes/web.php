@@ -4,6 +4,7 @@ use App\Http\Controllers\FineController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\MileageHistoryController;
 use App\Http\Controllers\OilChangeController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\VehicleController;
@@ -30,6 +31,9 @@ Route::get('/locacoes', [RentalController::class, 'index'])->middleware(['auth',
 Route::get('/locacoes/{rental}', [RentalController::class, 'show'])->middleware(['auth', 'verified'])->name('rental.show');
 Route::post('/locacoes', [RentalController::class, 'store'])->middleware(['auth', 'verified'])->name('rental.store');
 Route::patch('/locacoes/{rental}', [RentalController::class, 'update'])->middleware(['auth', 'verified'])->name('rental.patch');
+Route::delete('/rental/photo/{rental}', [RentalController::class, 'deletePhoto'])->middleware('auth')->name('photo.delete');
+Route::get('/rental/photo/{rental}', [RentalController::class, 'photo'])->middleware('auth')->name('photo.show');
+
 
 Route::view('/veiculos/adicionar', 'vehicle.new')->middleware(['auth', 'verified'])->name('vehicle.new');
 Route::get('/veiculos', [VehicleController::class, 'index'])->middleware(['auth', 'verified'])->name('vehicle.index');
@@ -54,6 +58,9 @@ Route::put('/multa/{fine}', [FineController::class, 'update'])->middleware(['aut
 Route::post('/multa/{vehicle}', [FineController::class, 'store'])->middleware(['auth', 'verified'])->name('fine.store');
 Route::delete('/multa/{vehicle}', [FineController::class, 'destroy'])->middleware(['auth', 'verified'])->name('fine.delete');
 Route::get('/multa/{vehicle}/{rental?}', [FineController::class, 'index'])->middleware(['auth', 'verified'])->name('fine.show');
+
+Route::get('/financas/{vehicle}/{rental?}', [PaymentController::class, 'index'])->middleware(['auth', 'verified'])->name('payment.show');
+Route::put('/financas/{payment}', [PaymentController::class, 'update'])->middleware(['auth', 'verified'])->name('payment.update');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

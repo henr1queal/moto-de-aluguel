@@ -45,7 +45,7 @@
         </div>
     @endif
     <div class="container">
-        <form method="POST" action="{{ route('rental.patch', ['rental' => $rental->id]) }}">
+        <form method="POST" action="{{ route('rental.patch', ['rental' => $rental->id]) }}" enctype="multipart/form-data">
             @csrf
             @method('PATCH')
             <div class="row g-0">
@@ -54,7 +54,15 @@
                 </div>
             </div>
             <div class="row mt-4 g-3">
-                <div class="col mt-0">
+                <div class="col mt-0 position-relative">
+                    @if ($rental->photo)
+                        <!-- Imagem com evento de clique para abrir o modal -->
+                        <div class="position-absolute end-0 me-2" style="top: -2%">
+                            <img src="{{ route('photo.show', ['rental' => $rental->id]) }}" alt="Imagem da Locação"
+                                style="max-width: 80px; max-height: 80px; cursor: pointer;" data-bs-toggle="modal"
+                                data-bs-target="#imageModal">
+                        </div>
+                    @endif
                     <div><small><strong>Dados sobre o locador:</strong></small></div>
                     <div class="mt-3">
                         <label for="landlord_name" class="form-label fw-light">Nome completo<span
@@ -618,6 +626,29 @@
                 </div>
             </div>
         </div>
+        <!-- Modal listagem Finanças-->
+        <div aria-modal="true" class="modal fade" id="financasModal" tabindex="-1"
+            aria-labelledby="financasModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="background-color: #242424;">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="financasModalLabel">Finanças</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <small class="text-white"><strong>Histórico de financas:</strong></small>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col" id="financasModalBody">...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Modal listagem Multa-->
         <div aria-modal="true" class="modal fade" id="multaModal" tabindex="-1" aria-labelledby="multaModalLabel"
             aria-hidden="true">
@@ -701,6 +732,32 @@
                 </div>
             </div>
         </div>
+        @if ($rental->photo)
+            <!-- Modal imagem -->
+            <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered bg-transparent">
+                    <div class="modal-content bg-transparent">
+                        <div class="modal-header border-0">
+                            <button type="button" class="btn-close btn-close-white bg-white opacity-100"
+                                data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img id="modalImage" src="{{ route('photo.show', ['rental' => $rental->id]) }}"
+                                alt="Imagem da Locação" class="img-fluid">
+                            <div class="mt-4">
+                                <form action="{{ route('photo.delete', ['rental' => $rental->id]) }}"
+                                    onsubmit="return confirm('Deseja deletar esta imagem?')" method="post">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm">Excluir foto</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 @endsection
 @section('options-button')
@@ -736,7 +793,8 @@
                     <hr class="dropdown-divider">
                 </li>
                 <li>
-                    <a class="d-block text-decoration-none text-black">
+                    <a data-bs-toggle="modal" data-bs-target="#financasModal" onclick="fetchPaymentData()"
+                        class="d-block text-decoration-none text-black">
                         <span class="fs-2 text-black"><strong>$</strong></span>
                         <small class="d-block" style="font-size: 12px;">Finanças</small>
                     </a>
@@ -868,6 +926,10 @@
 
         let currentPage = 1; // Página inicial
 
+        function formattedDate(date) {
+            return new Date(date).toLocaleDateString('pt-BR');
+        }
+
         function fetchMileageData(page = 1) {
             const apiUrl =
                 `/km-diaria/{{ $rental->vehicle->id }}/{{ $rental->id }}?page=${page}`; // Adiciona o número da página
@@ -880,13 +942,12 @@
                         let html = '';
 
                         data.data.forEach((item) => {
-                            const formattedDate = new Date(item.created_at).toLocaleDateString('pt-BR');
                             const collapseId = `collapse-${item.count}`;
 
                             html += `
                         <div class="row mb-3" style="border-bottom: 1px solid white; padding-bottom: 8px;">
                                 <div class="col-12 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
-                                    <span>${item.count}. ${formattedDate}</span>
+                                    <span>${item.count}. ${formattedDate(item.created_at)}</span>
                                     <span class="badge rounded-3 fs-6" style="border: 1px solid white;">${item.actual_km}</span>
                             </div>
                         </div>
@@ -899,7 +960,7 @@
                                         <p><strong>Observação:</strong> ${item.observation ?? 'Sem observações.'}</p>
                                     </div>
                                 </div>
-                                <form method="POST" action="/multa/${item.id}" onsubmit="return confirm('Confirma deletar o anexo de ${formattedDate}?');">
+                                <form method="POST" action="/multa/${item.id}" onsubmit="return confirm('Confirma deletar o anexo de ${formattedDate(item.created_at)}?');">
                                     @method('DELETE')
                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
@@ -973,13 +1034,12 @@
                 let html = '';
 
                 data.data.forEach((item) => {
-                    const formattedDate = new Date(item.date).toLocaleDateString('pt-BR');
                     const collapseId = `collapse-${item.id}`;
 
                     html += `
                 <div class="row mb-3" style="border-bottom: 1px solid white; padding-bottom: 8px;">
                     <div class="col-12 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
-                        <span>${item.count}. ${formattedDate}</span>
+                        <span>${item.count}. ${formattedDate(item.date)}</span>
                         <span class="badge rounded-3 fs-6" style="border: 1px solid white;">R$ ${item.cost}</span>
                     </div>
                 </div>
@@ -994,7 +1054,7 @@
                                 <p><strong>Observação:</strong> ${item.observation ?? 'Sem observações.'}</p>
                             </div>
                         </div>
-                        <form method="POST" action="/${sectionTitle === 'Manutenção' ? 'manutencao' : 'troca-de-oleo'}/${item.id}" onsubmit="return confirm('Confirma deletar a ${sectionTitle.toLowerCase()} de ${formattedDate}?');">
+                        <form method="POST" action="/${sectionTitle === 'Manutenção' ? 'manutencao' : 'troca-de-oleo'}/${item.id}" onsubmit="return confirm('Confirma deletar a ${sectionTitle.toLowerCase()} de ${formattedDate(item.date)}?');">
                             @method('DELETE')
                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
@@ -1041,14 +1101,13 @@
                         let html = '';
 
                         data.data.forEach((item) => {
-                            const formattedDate = new Date(item.created_at).toLocaleDateString('pt-BR');
                             const collapseId = `collapse-${item.count}`;
 
                             html += `
                         <div class="row mb-3" style="border-bottom: 1px solid white; padding-bottom: 8px;">
                             <!-- Entrada principal -->
                             <div class="col-12 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
-                                <span>${item.count}. ${formattedDate} - R$ ${item.cost}</span>
+                                <span>${item.count}. ${formattedDate(item.created_at)} - R$ ${item.cost}</span>
                                 <span class="badge rounded-3 fs-6 ${item.paid == 1 ? 'text-bg-success' : 'text-bg-danger'}">${item.paid == 1 ? 'Pago' : 'Não pago'}</span>
                             </div>
                         </div>
@@ -1067,7 +1126,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <form method="POST" action="/multa/${item.id}" onsubmit="return confirm('Confirma deletar a multa de ${formattedDate}?');">
+                                <form method="POST" action="/multa/${item.id}" onsubmit="return confirm('Confirma deletar a multa de ${formattedDate(item.created_at)}?');">
                                     @method('DELETE')
                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
@@ -1109,6 +1168,71 @@
                 });
         }
 
+        function fetchPaymentData() {
+    const apiUrl = `/financas/{{ $rental->vehicle->id }}/{{ $rental->id }}`;
+
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            const resultsContainer = document.getElementById('financasModalBody');
+            if (data && data.length > 0) {
+                let html = '';
+
+                data.forEach((item) => {
+                    const collapseId = `collapse-${item.count}`;
+                    const paymentDate = new Date(item.payment_date);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    let badgeClass = null; // Default: Pago (verde)
+
+                    if (item.paid == 0) {
+                        if (paymentDate.getTime() === today.getTime()) {
+                            badgeClass = 'text-warning fw-bold'; // Hoje e não pago (laranja)
+                        } else if (paymentDate.getTime() < today.getTime()) {
+                            badgeClass = 'text-danger fw-bold'; // Passado e não pago (vermelho)
+                        }
+                    }
+
+                    html += `
+                    <div class="row mb-3" style="border-bottom: 1px solid white; padding-bottom: 8px;">
+                        <!-- Entrada principal -->
+                        <div class="col-12 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
+                            <span class="${badgeClass}">${item.count}. ${formattedDate(item.payment_date)} - R$ ${item.cost}</span>
+                                <span class="badge rounded-3 fs-6 ${item.paid == 1 ? 'text-bg-success' : 'text-bg-danger'}">${item.paid == 1 ? 'Pago' : 'Não pago'}</span>
+                            </div>
+                        </div>
+
+                        <!-- Collapse correspondente -->
+                        <div class="collapse mb-3" id="${collapseId}">
+                            <div class="card card-body" style="background-color: #343a40; color: white;">
+                                <div class="row gap-3">
+                                    <div class="col-auto">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked-${item.id}" ${item.paid == 1 ? 'checked' : ''} onchange="togglePaymentPaidStatus('${item.id}')">
+                                            <label class="form-check-label" for="flexSwitchCheckChecked-${item.id}">Pago</label>
+                                        </div>
+                                    </div>`;
+                            if (item.paid_in) {
+                                html += `<div class="col-auto">Pago em ${formattedDate(item.paid_in)}</div>`;
+                            }
+                            html += `</div>
+                            </div>  
+                        </div>
+                    `;
+                        });
+                        resultsContainer.innerHTML = html;
+                    } else {
+                        resultsContainer.innerHTML = 'Nenhum dado encontrado.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar dados:', error);
+                    const resultsContainer = document.getElementById('financasModalBody');
+                    resultsContainer.innerHTML = 'Erro ao carregar os dados.';
+                });
+        }
+
         async function togglePaidStatus(itemId) {
             const checkbox = document.getElementById(`flexSwitchCheckChecked-${itemId}`);
             const previousState = checkbox.checked;
@@ -1135,6 +1259,47 @@
                             window.location.reload()
                         } else {
                             alert('Multa não paga!')
+                            window.location.reload()
+
+                        }
+                    }
+                    // Se a requisição for bem-sucedida, não precisamos fazer nada, o estado já está atualizado
+                } catch (error) {
+                    console.error('Erro:', error);
+                    // Reverte o estado do checkbox em caso de erro
+                    checkbox.checked = !previousState;
+                }
+            } else {
+                checkbox.checked = !previousState;
+            }
+        }
+
+        async function togglePaymentPaidStatus(itemId) {
+            const checkbox = document.getElementById(`flexSwitchCheckChecked-${itemId}`);
+            const previousState = checkbox.checked;
+
+            if (confirm('Deseja mudar o status do pagamento?')) {
+                try {
+                    const response = await fetch(`/financas/${itemId}`, {
+                        method: 'put',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}' // Adicionar token CSRF para segurança
+                        },
+                        body: JSON.stringify({
+                            paid: checkbox.checked,
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erro ao atualizar o status');
+                    } else {
+                        if (previousState) {
+                            alert('Cobrança paga!')
+                            window.location.reload()
+                        } else {
+                            alert('Cobrança não paga!')
                             window.location.reload()
 
                         }
