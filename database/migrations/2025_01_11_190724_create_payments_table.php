@@ -16,6 +16,7 @@ return new class extends Migration
             $table->boolean('paid');
             $table->decimal('cost', 10, 2);
             $table->date('payment_date');
+            $table->date('paid_in');
             $table->text('observation')->nullable();
             $table->foreignUuid('rental_id')->constrained()->onDelete('cascade');
             $table->timestamps();
