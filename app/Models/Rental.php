@@ -64,6 +64,15 @@ class Rental extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function hasOverduePayments(): bool
+    {
+        return $this->payments()
+            ->where('payment_date', '<', now())
+            ->where('paid', 0)
+            ->exists();
+    }
+
+
     public function mileageHistory(): HasMany
     {
         return $this->hasMany(MileageHistory::class);

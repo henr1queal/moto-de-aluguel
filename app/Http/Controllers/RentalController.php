@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Maintenance;
-use App\Models\OilChange;
 use App\Models\Rental;
 use App\Models\Vehicle;
 use Carbon\Carbon;
@@ -21,11 +19,15 @@ class RentalController extends Controller
     public function index()
     {
         $myRentals = Auth()->user()->rentals()
-            ->orderByRaw('finished_at IS NULL DESC') // Prioriza os registros com finished_at = NULL
-            ->orderBy('finished_at', 'desc') // Depois, ordena finished_at pelos mais recentes
+            ->orderByRaw('finished_at IS NULL DESC')
+            ->orderBy('finished_at', 'desc')
             ->paginate(10);
+
+        foreach ($myRentals as $rental) {
+            $rental->finished_at === null ? $rental->has_overdue_payments = $rental->hasOverduePayments() : null;
+        }
+
         return view('rental.index', compact('myRentals'));
-        //
     }
 
     /**
@@ -33,7 +35,7 @@ class RentalController extends Controller
      */
     public function create()
     {
-        $myVehicles = Vehicle::where('user_id', Auth()->user()->id)->get();
+        $myVehicles = Vehicle::where('user_id', Auth()->user()->id)->whereDoesntHave('actualRental')->get();
         if ($myVehicles->count() === 0) {
             return redirect()->back()->with('error', 'Você precisa ter veículos cadastrados.');
         }
@@ -45,15 +47,15 @@ class RentalController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $this->validateRentalData($request);
 
         try {
+            $validated = $this->validateRentalData($request);
             DB::beginTransaction();
             // $photoPath = $this->uploadPhoto($request->file('photo'));
             $photoPath = '123';
-            $this->createRental($validated, $photoPath);
+            $rental = $this->createRental($validated, $photoPath);
             $this->updateVehicle($validated['vehicle_id'], $request->only(['revision_period', 'oil_period']));
-
+            $this->createPayments($rental->id, $validated['start_date'], $validated['end_date'], $validated['cost'], 'Wednesday');
             DB::commit();
 
             return redirect()->route('rental.index')->with('success', 'Locação adicionada com sucesso!');
@@ -205,6 +207,7 @@ class RentalController extends Controller
             'observation' => 'string|nullable|max:1000',
             'oil_period' => 'required|integer|max:999999',
             'revision_period' => 'required|integer|max:999999',
+            // 'payment_day' => 'required|string|in:Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
         ]);
     }
 
@@ -257,7 +260,6 @@ class RentalController extends Controller
                 },
             ],
             'cost' => 'required|numeric|min:0|max:999999',
-            'deposit' => 'required|numeric|min:0|max:999999',
             'zip_code' => 'required|string|size:8',
             'state' => 'required|string|max:2|in:AC,AL,AP,AM,BA,CE,DF,ES,GO,MA,MS,MT,MG,PA,PB,PR,PE,PI,RJ,RN,RS,RO,RR,SC,SP,SE,TO',
             'city' => 'required|string|min:3|max:50',
@@ -274,7 +276,6 @@ class RentalController extends Controller
             throw ValidationException::withMessages([
                 'errors' => $validator->errors(),
                 'validated' => $validator->validated(),
-                ''
             ]);
         }
 
@@ -298,5 +299,25 @@ class RentalController extends Controller
     {
         $vehicle = Vehicle::find($vehicleId);
         $vehicle->update($updates);
+    }
+
+    protected function createPayments(string $rentalId, string $startDate, int $endDate, float $cost, string $paymentDay)
+    {
+        $startDate = Carbon::parse($startDate);
+        $endDate = $startDate->copy()->addMonths($endDate);
+        $weeksDifference = $startDate->diffInWeeks($endDate);
+
+        $payments = [];
+        for ($i = 0; $i < $weeksDifference; $i++) {
+            $paymentDate = $startDate->copy()->addWeeks($i)->next($paymentDay);
+            $payments[] = [
+                'rental_id' => $rentalId,
+                'cost' => $cost,
+                'paid' => 0,
+                'payment_date' => $paymentDate->toDateString(),
+                'created_at' => now()
+            ];
+        }
+        return DB::table('payments')->insert($payments);
     }
 }

@@ -6,13 +6,19 @@
         }
 
         .info-placa {
-            bottom: -26%;
+            bottom: 19%;
             z-index: 2;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         .content {
             height: 85dvh;
             margin-bottom: 10px;
+        }
+
+        .vehicle {
+            border: 1px solid white;
         }
     </style>
 @endsection
@@ -58,29 +64,23 @@
                 </div>
             @else
                 @foreach ($myRentals as $rental)
-                    <div class="col-6 d-flex mb-5">
+                    <div class="col-6 mb-4">
                         <a href="{{ route('rental.show', ['rental' => $rental->id]) }}"
-                            class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
-                            <div class="row justify-content-center g-0">
-                                <div class="col-12 text-center">
-                                    <div class="bg-white mx-auto rounded-circle position-relative"
-                                        style="width: 140px; height: 140px;">
-                                        <div class="d-flex justify-content-center h-100">
-                                            <img src="{{ asset('assets/svg/silhueta.svg') }}" alt=""
-                                                class="img-fluid" style="width: 76px; height: auto;">
-                                        </div>
-                                        <div class="info-placa position-absolute w-100"
-                                            style="left: 50%; transform: translateX(-50%);">
-                                            <span class="fs-4 text-break text-black mb-0"><strong>{{ $rental->vehicle->license_plate }}</strong></span>
-                                            @if ($rental->finished_at === null)
-                                            <br><small class="text-success"><strong>Ativa</strong></small>                                                
-                                            @else
-                                            <br><small class="text-danger"><strong>Finalizada</strong></small>                                                
-
-                                            @endif
-                                        </div>
-                                        <img src="{{ asset('assets/svg/placa.svg') }}" alt=""
-                                            class="position-absolute placa" style="left: 50%; transform: translateX(-50%);">
+                            class="text-decoration-none text-white">
+                            <div class="vehicle rounded-4 text-center pt-2 pb-5 position-relative">
+                                <small><strong>{{ $rental->landlord_name }}</strong></small>
+                                <br><small>{{ $rental->vehicle->brand }}</small>
+                                <br><small>{{ $rental->vehicle->model }} {{ $rental->vehicle->year }}</small>
+                                @if ($rental->finished_at === null)
+                                    <br><small class="text-success"><strong>Ativa / @if($rental->has_overdue_payments) <span class="text-warning">Com pendências</span> @else Em dia @endif</strong></small>
+                                @else
+                                    <br><small class="text-danger"><strong>Finalizada</strong></small>
+                                @endif
+                                <div class="placa position-absolute w-100">
+                                    <div class="position-relative">
+                                        <img src="{{ asset('assets/svg/placa.svg') }}" alt="" class="w-100">
+                                        <span
+                                            class="fs-4 w-100 text-black position-absolute info-placa"><strong>{{ $rental->vehicle->license_plate }}</strong></span>
                                     </div>
                                 </div>
                             </div>
@@ -93,7 +93,8 @@
 @endsection
 @section('options-button')
     <div class="container text-end pe-4">
-        <a href="{{ route('rental.new') }}" class="btn btn-light fs-1 py-0 rounded-3 text-decoration-none" style="height: 44px;">
+        <a href="{{ route('rental.new') }}" class="btn btn-light fs-1 py-0 rounded-3 text-decoration-none"
+            style="height: 44px;">
             <strong>+</strong>
         </a>
     </div>

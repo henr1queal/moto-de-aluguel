@@ -73,6 +73,6 @@ class User extends Authenticatable
 
     public function rentals(): HasManyThrough
     {
-        return $this->hasManyThrough(Rental::class, Vehicle::class)->with('vehicle:id,license_plate');
+        return $this->hasManyThrough(Rental::class, Vehicle::class)->with('vehicle:id,license_plate,brand,model,year');
     }
 }
