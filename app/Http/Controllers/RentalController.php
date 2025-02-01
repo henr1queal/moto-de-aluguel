@@ -47,22 +47,20 @@ class RentalController extends Controller
      */
     public function store(Request $request)
     {
-
         try {
             $validated = $this->validateRentalData($request);
             DB::beginTransaction();
-            // $photoPath = $this->uploadPhoto($request->file('photo'));
-            $photoPath = '123';
+            $photoPath = $this->uploadPhoto($request->file('photo'));
             $rental = $this->createRental($validated, $photoPath);
             $this->updateVehicle($validated['vehicle_id'], $request->only(['revision_period', 'oil_period']));
-            $this->createPayments($rental->id, $validated['start_date'], $validated['end_date'], $validated['cost'], 'Wednesday');
+            $this->createPayments($rental->id, $validated['start_date'], $validated['end_date'], $validated['cost'], $validated['payment_day']);
             DB::commit();
 
             return redirect()->route('rental.index')->with('success', 'Locação adicionada com sucesso!');
         } catch (\Exception $e) {
             DB::rollBack();
             if (isset($photoPath)) {
-                Storage::disk('public')->delete($photoPath);
+                Storage::disk('private')->delete($photoPath);
             }
             return redirect()->back()->with('error', 'Corrija os dados do formulário e tente novamente.');
         }
@@ -91,20 +89,23 @@ class RentalController extends Controller
      */
     public function update(Request $request, Rental $rental)
     {
-
         try {
             $validated = $this->validateRentalUpdateData($request);
             DB::beginTransaction();
 
-            if (!$rental->photo && isset($validated['photo'])) {
-                $photoPath = '123';
+            if(isset($validated['photo'])){
+                $photoPath = $this->uploadPhoto($request->file('photo'));
                 $validated['photo'] = $photoPath;
+            }
+
+            if($rental->photo) {
+                Storage::disk('private')->delete($rental->photo);
             }
 
             $rental->fill($validated);
 
             if ($rental->isDirty()) {
-                $rental->save(); // Salva somente se houver mudanças
+                $rental->save();
             }
 
             DB::commit();
@@ -120,7 +121,7 @@ class RentalController extends Controller
             DB::rollBack();
 
             if (isset($photoPath)) {
-                Storage::disk('public')->delete($photoPath);
+                Storage::disk('private')->delete($photoPath);
             }
             return redirect()->back()->with('error', 'Corrija os dados do formulário e tente novamente.');
         }
@@ -207,7 +208,7 @@ class RentalController extends Controller
             'observation' => 'string|nullable|max:1000',
             'oil_period' => 'required|integer|max:999999',
             'revision_period' => 'required|integer|max:999999',
-            // 'payment_day' => 'required|string|in:Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
+            'payment_day' => 'required|string|in:Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
         ]);
     }
 
@@ -283,10 +284,15 @@ class RentalController extends Controller
     }
 
 
-    // protected function uploadPhoto($photo)
-    // {
-    //     return $photo->store('rentals/photos', 'public');
-    // }
+    protected function uploadPhoto($photo)
+    {
+        $fileName = time() . '_' . $photo->getClientOriginalName(); // Evitar nomes duplicados
+
+        // Salva a imagem na pasta 'storage/app/private'
+        $photo->storeAs('private', $fileName);
+
+        return $fileName;
+    }
 
     protected function createRental(array $data, string $photoPath)
     {
@@ -319,5 +325,32 @@ class RentalController extends Controller
             ];
         }
         return DB::table('payments')->insert($payments);
+    }
+
+    public function photo(Rental $rental)
+    {
+        $path = storage_path("app/private/{$rental->photo}");
+        
+        if (!file_exists($path)) {
+            abort(404);
+        }
+
+        return response()->file($path);
+    }
+    
+    public function deletePhoto(Rental $rental)
+    {
+        $photo = $rental->photo;
+        $path = storage_path("app/private/{$photo}");
+        
+        if (!file_exists($path)) {
+            abort(404);
+        }
+
+        $rental->update(['photo' => null]);
+        
+        Storage::disk('private')->delete($photo);
+
+        return redirect()->back()->with('success', 'Imagem deletada!');
     }
 }
