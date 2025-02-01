@@ -74,7 +74,7 @@ class MileageHistoryController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'actual_km' => 'required|integer',
-            'observation' => 'string'
+            'observation' => 'nullable|string'
         ]);
 
         if ($validator->fails()) {

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('birth_date');
             $table->string('phone_1');
             $table->string('phone_2')->nullable();
-            $table->string('mother_name');
+            $table->string('mother_name')->nullable();
             $table->string('father_name')->nullable();
             $table->date('start_date');
             $table->date('end_date');
