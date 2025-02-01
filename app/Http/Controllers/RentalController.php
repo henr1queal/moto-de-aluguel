@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
 use App\Models\Rental;
 use App\Models\Vehicle;
 use Carbon\Carbon;
@@ -100,6 +101,11 @@ class RentalController extends Controller
 
             if($rental->photo) {
                 Storage::disk('private')->delete($rental->photo);
+            }
+
+            $actualCost = $rental->cost;
+            if($actualCost !== $validated['cost']) {
+                Payment::where('rental_id', $rental->id)->where('paid', 0)->update(['cost' => $validated['cost']]);
             }
 
             $rental->fill($validated);
