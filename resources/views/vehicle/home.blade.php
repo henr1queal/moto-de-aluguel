@@ -1,16 +1,19 @@
 @extends('layouts.bootstrap')
 @section('head')
     <style>
-        .placa {
-            bottom: -14%;
+        @media(min-width: 992px) {
+            .placa {
+                bottom: -57px !important;
+            }
         }
-
+        
         .placa {
-            bottom: -16%;
+            bottom: -26px;
             z-index: 2;
             left: 50%;
             transform: translateX(-50%);
         }
+
 
         .info-placa {
             left: 50%;
@@ -70,14 +73,19 @@
                 </div>
             @else
                 @foreach ($myVehicles as $vehicle)
-                    <div class="col-6 mb-4">
+                    <div class="col-6 col-lg-2 mb-lg-5 mb-4">
                         <a href="{{ route('vehicle.show', ['vehicle' => $vehicle->id]) }}"
                             class="text-decoration-none text-white">
-                            <div class="vehicle rounded-4 text-center pt-2 pb-5 position-relative">
+                            <div class="vehicle rounded-4 text-center pt-2 pb-5 pb-lg-4 position-relative">
                                 <small>{{ $vehicle->brand }}</small>
                                 <br><small>{{ $vehicle->model }}</small>
                                 <br><small>ANO: {{ $vehicle->year }}</small>
-                                <br><small class="text-success">DISPONÍVEL</small>
+                                <br>
+                                @if ($vehicle->actualRental)
+                                    <small class="text-warning">ALUGADA</small>
+                                @else
+                                    <small class="text-success">DISPONÍVEL</small>
+                                @endif
                                 <div class="placa position-absolute w-100">
                                     <div class="position-relative">
                                         <img src="{{ asset('assets/svg/placa.svg') }}" alt="" class="w-100">

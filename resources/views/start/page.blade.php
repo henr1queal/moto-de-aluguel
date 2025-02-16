@@ -14,7 +14,7 @@
             </div>
         </div>
         <div class="row g-0 mt-4 g-3">
-            <div class="col-6 col-lg-2 d-flex">
+            <div class="col-6 col-lg-3 col-xxl-2 d-flex">
                 <a href="{{ route('vehicle.index') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                     <div class="row g-0">
@@ -33,7 +33,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-6 col-lg-2 d-flex">
+            <div class="col-6 col-lg-3 col-xxl-2 d-flex">
                 <a href="{{ route('rental.index') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                     <div class="row g-0">
@@ -52,8 +52,8 @@
                     </div>
                 </a>
             </div>
-            <div class="col-6 col-lg-2 d-flex">
-                <a href="{{ route('profile.edit') }}"
+            <div class="col-6 col-lg-3 col-xxl-2 d-flex">
+                <a href="{{ route('payment.index') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                     <div class="row g-0">
                         <div class="pt-3 pb-2 px-4 text-center">
@@ -71,8 +71,8 @@
                     </div>
                 </a>
             </div>
-            <div class="col-6 col-lg-2 d-flex">
-                <a href="{{ route('profile.edit') }}"
+            <div class="col-6 col-lg-3 col-xxl-2 d-flex">
+                <a href="{{ route('notifications') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                     <div class="row g-0">
                         <div class="pt-3 pb-2 px-4 text-center">
@@ -90,8 +90,8 @@
                     </div>
                 </a>
             </div>
-            <div class="col-6 col-lg-2 d-flex">
-                <a href="{{ route('profile.edit') }}"
+            <div class="col-6 col-lg-3 col-xxl-2 d-flex">
+                <a href="{{ route('user.index') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                     <div class="row g-0">
                         <div class="pt-3 pb-2 px-4 text-center">
@@ -99,7 +99,7 @@
                                 <img src="{{ asset('assets/svg/profile.svg') }}" alt=""
                                     style="width: 30px; height: auto;" class="mx-auto">
                                 <p class="mb-0 fw-light" style="font-size: 16px;">
-                                    Edite permissões, exclua ou aceite novos usuários
+                                    Edite permissões, adicione ou redefina usuários.
                                 </p>
                             </div>
                         </div>
@@ -109,7 +109,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-6 col-lg-2 d-flex">
+            <div class="col-6 col-lg-3 col-xxl-2 d-flex">
                 <a href="{{ route('profile.edit') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                     <div class="row g-0">

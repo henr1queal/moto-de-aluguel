@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class VehicleController extends Controller
 {
@@ -13,7 +14,7 @@ class VehicleController extends Controller
     public function index()
     {
         $authUserId = Auth()->user()->id;
-        $myVehicles = Vehicle::myVehicles()->select([
+        $myVehicles = Vehicle::select([
             'id',
             'brand',
             'model',
@@ -39,8 +40,19 @@ class VehicleController extends Controller
         $validated = $request->validate([
             'brand' => 'required|string|max:20',
             'model' => 'required|string|max:20',
-            'license_plate' => 'required|regex:/^[A-Z]{3}-\d{1}[A-Z0-9]{1}\d{2}$/|string|max:8|unique:vehicles,license_plate',
-            'renavam' => 'required|string|max:11|unique:vehicles,renavam',
+            'license_plate' => [
+                'required',
+                'regex:/^[A-Z]{3}-\d{1}[A-Z0-9]{1}\d{2}$/i',
+                'string',
+                'max:8',
+                Rule::unique('vehicles', 'license_plate')->whereNull('deleted_at')
+            ],
+            'renavam' => [
+                'required',
+                'string',
+                'max:15',
+                Rule::unique('vehicles', 'renavam')->whereNull('deleted_at')
+            ],
             'actual_km' => 'required|integer|min:0',
             'revision_period' => 'required|integer',
             'year' => 'required|integer|between:2010,2026',
@@ -49,11 +61,36 @@ class VehicleController extends Controller
         ]);
 
         $validated['user_id'] = auth()->id();
+        $validated['first_declared_km'] = $validated['actual_km'];
+        $validated['next_revision'] = $validated['actual_km'] + $validated['revision_period'];
+        $validated['next_oil_change'] = $validated['actual_km'] + $validated['oil_period'];
 
+        // Verifica se já existe um veículo deletado com a mesma license_plate OU renavam
+        $vehicle = Vehicle::withTrashed()
+            ->where(function ($query) use ($validated) {
+                $query->where('license_plate', $validated['license_plate'])
+                    ->orWhere('renavam', $validated['renavam']);
+            })
+            ->first();
+
+        if ($vehicle) {
+            // Se o veículo existe e está deletado, restauramos e atualizamos
+            $vehicle->restore();
+            $vehicle->update($validated);
+
+            return redirect()
+                ->route('vehicle.show', ['vehicle' => $vehicle->id])
+                ->with('success', 'Veículo reativado e atualizado com sucesso!');
+        }
+
+        // Se não existir, cria um novo veículo
         $vehicle = Vehicle::create($validated);
 
-        return redirect()->route('vehicle.show', ['vehicle' => $vehicle->id])->with('success', 'Veículo criado com sucesso!');
+        return redirect()
+            ->route('vehicle.show', ['vehicle' => $vehicle->id])
+            ->with('success', 'Veículo criado com sucesso!');
     }
+
 
     /**
      * Display the specified resource.
@@ -79,7 +116,13 @@ class VehicleController extends Controller
     {
         try {
             $validated = $request->validate([
-                'license_plate' => 'required|regex:/^[A-Z]{3}-\d{1}[A-Z0-9]{1}\d{2}$/|string|max:8|unique:vehicles,license_plate,' . $vehicle->id,
+                'license_plate' => [
+                    'required',
+                    'regex:/^[A-Z]{3}-\d{1}[A-Z0-9]{1}\d{2}$/i',
+                    'string',
+                    'max:8',
+                    Rule::unique('vehicles', 'license_plate')->whereNull('deleted_at')->ignore($vehicle->id)
+                ],
                 'renavam' => 'required|string|max:11|unique:vehicles,renavam,' . $vehicle->id,
                 'actual_km' => 'required|integer|min:0',
                 'revision_period' => 'required|integer',
@@ -93,28 +136,30 @@ class VehicleController extends Controller
 
             $vehicle->update($validated);
 
-            return redirect()->route('vehicle.show', $vehicle->id)->with('success', 'O veículo foi atualizado com sucesso.');
-        } catch (\Illuminate\Validation\ValidationException $th) {
-            // Captura os erros de validação e redireciona de volta com os erros
             return redirect()
                 ->route('vehicle.show', $vehicle->id)
-                ->withErrors($th->errors()) // Passa os erros de validação
+                ->with('success', 'O veículo foi atualizado com sucesso.');
+        } catch (\Illuminate\Validation\ValidationException $th) {
+            return redirect()
+                ->route('vehicle.show', $vehicle->id)
+                ->withErrors($th->errors())
                 ->withInput()
                 ->with('error', 'Houve um ou mais erros ao atualizar.');
         } catch (\Throwable $th) {
             return redirect()
                 ->route('vehicle.show', $vehicle->id)
-                ->with('error', 'Houve um ou mais erros ao atualizar.');
+                ->with('error', 'Houve um erro inesperado ao atualizar.');
         }
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Vehicle $vehicle)
     {
-        if($vehicle->user_id === Auth()->user()->id) {
-            if($vehicle->actualRental) {
+        if ($vehicle->user_id === Auth()->user()->id) {
+            if ($vehicle->actualRental) {
                 return redirect()->back()->with('error', 'Veículo alugado.');
             }
             $vehicle->delete();

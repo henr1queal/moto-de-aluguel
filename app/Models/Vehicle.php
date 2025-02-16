@@ -24,6 +24,9 @@ class Vehicle extends Model
         'revision_period',
         'oil_period',
         'protection_value',
+        'first_declared_km',
+        'next_oil_change',
+        'next_revision',
         'user_id'
     ];
 
@@ -40,10 +43,6 @@ class Vehicle extends Model
                 $model->id = Str::uuid();
             }
         });
-    }
-
-    public function scopeMyVehicles() {
-        return $this->where('user_id', Auth()->user()->id);
     }
 
     public function user(): BelongsTo
@@ -80,14 +79,19 @@ class Vehicle extends Model
     {
         return $this->hasOne(Rental::class)->whereNull('finished_at')->latest();
     }
-    
+
     public function latestMaintenance(): HasOne
     {
         return $this->hasOne(Maintenance::class)->orderByDesc('date')->latest();
     }
-    
+
     public function latestOilChange(): HasOne
     {
         return $this->hasOne(OilChange::class)->orderByDesc('date')->latest();
+    }
+
+    public function setLicensePlateAttribute($value)
+    {
+        $this->attributes['license_plate'] = strtoupper($value);
     }
 }

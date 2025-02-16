@@ -36,6 +36,14 @@ class Rental extends Model
         'complement',
         'photo',
         'vehicle_id',
+        'payment_day',
+        'observation',
+        'contract_break_fee',
+        'contract_break_fee_value',
+        'damage_fee',
+        'damage_fee_value',
+        'stop_date',
+        'finish_observation',
         'finished_at'
     ];
 

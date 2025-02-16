@@ -6,6 +6,7 @@ use App\Models\Payment;
 use App\Models\Rental;
 use App\Models\Vehicle;
 use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -17,28 +18,49 @@ class RentalController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $myRentals = Auth()->user()->rentals()
+        $filter = $request->input('filter', 'todos'); // Pega o filtro ou usa "todos" como padrão
+
+        $query = Auth()->user()->rentals();
+
+        switch ($filter) {
+            case 'ativos':
+                $query->whereNull('finished_at'); // Apenas ativos (não finalizados)
+                break;
+
+            case 'cancelados':
+                $query->whereNotNull('stop_date'); // Apenas cancelados (parados manualmente)
+                break;
+
+            case 'finalizados':
+                $query->whereNotNull('finished_at')->whereNull('stop_date'); // Finalizados corretamente
+                break;
+        }
+
+        $myRentals = $query
             ->orderByRaw('finished_at IS NULL DESC')
             ->orderBy('finished_at', 'desc')
             ->paginate(10);
 
         foreach ($myRentals as $rental) {
-            $rental->finished_at === null ? $rental->has_overdue_payments = $rental->hasOverduePayments() : null;
+            if ($rental->finished_at === null) {
+                $rental->has_overdue_payments = $rental->hasOverduePayments();
+            }
         }
 
-        return view('rental.index', compact('myRentals'));
+        return view('rental.index', compact('myRentals', 'filter'));
     }
+
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        $myVehicles = Vehicle::where('user_id', Auth()->user()->id)->whereDoesntHave('actualRental')->get();
+        $myVehicles = Vehicle::whereDoesntHave('actualRental')->get();
         if ($myVehicles->count() === 0) {
-            return redirect()->back()->with('error', 'Você precisa ter veículos cadastrados.');
+            return redirect()->back()->with('error', 'Você precisa ter veículos cadastrados e disponíveis.');
         }
         return view('rental.new', compact('myVehicles'));
     }
@@ -51,19 +73,36 @@ class RentalController extends Controller
         try {
             $validated = $this->validateRentalData($request);
             DB::beginTransaction();
-            $photoPath = $this->uploadPhoto($request->file('photo'));
+
+            $photoPath = isset($validated['photo']) ? $this->uploadPhoto($request->file('photo')) : null;
+
             $rental = $this->createRental($validated, $photoPath);
             $this->updateVehicle($validated['vehicle_id'], $request->only(['revision_period', 'oil_period']));
             $this->createPayments($rental->id, $validated['start_date'], $validated['end_date'], $validated['cost'], $validated['payment_day']);
+
             DB::commit();
 
             return redirect()->route('rental.index')->with('success', 'Locação adicionada com sucesso!');
-        } catch (\Exception $e) {
+        } catch (ValidationException $e) {
             DB::rollBack();
+
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (QueryException $e) {
+            DB::rollBack();
+
             if (isset($photoPath)) {
                 Storage::disk('private')->delete($photoPath);
             }
-            return redirect()->back()->with('error', 'Corrija os dados do formulário e tente novamente.');
+
+            return redirect()->back()->with('error', 'Erro no banco de dados: ' . $e->getMessage())->withInput();
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            if (isset($photoPath)) {
+                Storage::disk('private')->delete($photoPath);
+            }
+
+            return redirect()->back()->with('error', 'Erro inesperado: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -73,7 +112,17 @@ class RentalController extends Controller
      */
     public function show(Rental $rental)
     {
+        $days = [
+            'Sunday' => 'Domingo',
+            'Monday' => 'Segunda-feira',
+            'Tuesday' => 'Terça-feira',
+            'Wednesday' => 'Quarta-feira',
+            'Thursday' => 'Quinta-feira',
+            'Friday' => 'Sexta-feira',
+            'Saturday' => 'Sábado'
+        ];
         $rental->load(['vehicle.latestMaintenance', 'vehicle.latestOilChange']);
+        $rental->payment_day = $days[$rental->payment_day];
         return view('rental.show', compact('rental'));
     }
 
@@ -94,17 +143,13 @@ class RentalController extends Controller
             $validated = $this->validateRentalUpdateData($request);
             DB::beginTransaction();
 
-            if(isset($validated['photo'])){
+            if (isset($validated['photo'])) {
                 $photoPath = $this->uploadPhoto($request->file('photo'));
                 $validated['photo'] = $photoPath;
             }
 
-            if($rental->photo) {
-                Storage::disk('private')->delete($rental->photo);
-            }
-
             $actualCost = $rental->cost;
-            if($actualCost !== $validated['cost']) {
+            if ($actualCost !== $validated['cost']) {
                 Payment::where('rental_id', $rental->id)->where('paid', 0)->update(['cost' => $validated['cost']]);
             }
 
@@ -155,7 +200,7 @@ class RentalController extends Controller
                 },
             ],
             'landlord_cpf' => 'required|string|size:11',
-            'driver_license_number' => 'required|string|min:7|max:25',
+            'driver_license_number' => 'required|string|min:5|max:25',
             'driver_license_issue_date' => 'required|date|before:today',
             'birth_date' => [
                 'required',
@@ -200,7 +245,7 @@ class RentalController extends Controller
             'street' => 'required|string|min:2|max:100',
             'house_number' => 'nullable|integer|max:999999',
             'complement' => 'nullable|string|max:150',
-            'photo' => 'nullable|image|max:2048',
+            'photo' => 'nullable|mimes:jpeg,jpg,png|max:10000',
             'vehicle_id' => [
                 'required',
                 'exists:vehicles,id',
@@ -232,7 +277,7 @@ class RentalController extends Controller
                 },
             ],
             'landlord_cpf' => 'required|string|size:11',
-            'driver_license_number' => 'required|string|min:7|max:25',
+            'driver_license_number' => 'required|string|min:5|max:25',
             'driver_license_issue_date' => 'required|date|before:today',
             'birth_date' => [
                 'required',
@@ -274,7 +319,7 @@ class RentalController extends Controller
             'street' => 'required|string|min:2|max:100',
             'house_number' => 'nullable|integer|max:999999',
             'complement' => 'nullable|string|max:150',
-            'photo' => 'nullable|image|max:2048',
+            'photo' => 'nullable|mimes:jpeg,jpg,png|max:10000',
             'observation' => 'string|nullable|max:1000',
         ]);
 
@@ -289,7 +334,6 @@ class RentalController extends Controller
         return $validator->validated();
     }
 
-
     protected function uploadPhoto($photo)
     {
         $fileName = time() . '_' . $photo->getClientOriginalName(); // Evitar nomes duplicados
@@ -300,7 +344,7 @@ class RentalController extends Controller
         return $fileName;
     }
 
-    protected function createRental(array $data, string $photoPath)
+    protected function createRental(array $data, string $photoPath = null)
     {
         $data['photo'] = $photoPath;
         $data['end_date'] = Carbon::parse($data['start_date'])->addMonths($data['end_date']);
@@ -336,27 +380,49 @@ class RentalController extends Controller
     public function photo(Rental $rental)
     {
         $path = storage_path("app/private/{$rental->photo}");
-        
+
         if (!file_exists($path)) {
             abort(404);
         }
 
         return response()->file($path);
     }
-    
+
     public function deletePhoto(Rental $rental)
     {
         $photo = $rental->photo;
         $path = storage_path("app/private/{$photo}");
-        
+
         if (!file_exists($path)) {
             abort(404);
         }
 
         $rental->update(['photo' => null]);
-        
+
         Storage::disk('private')->delete($photo);
 
         return redirect()->back()->with('success', 'Imagem deletada!');
+    }
+
+    public function finish(Request $request, Rental $rental)
+    {
+        $validated = $request->validate([
+            'contract_break_fee' => 'required|boolean',
+            'contract_break_fee_value' => 'nullable|numeric|min:0',
+            'damage_fee' => 'required|boolean',
+            'damage_fee_value' => 'nullable|numeric|min:0',
+            'stop_date' => 'required|date',
+            'finish_observation' => 'nullable|string',
+        ]);
+        
+        $validated['finished_at'] = $validated['stop_date'];
+        if ($rental->payments()->where('paid', 0)->count() === 0) {
+            $validated['stop_date'] = null;
+        };
+
+        // Atualiza os dados do aluguel
+        $rental->update($validated);
+
+        return redirect()->back()->with('success', 'Aluguel finalizado com sucesso!');
     }
 }

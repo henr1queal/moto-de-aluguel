@@ -43,7 +43,7 @@ class OilChangeController extends Controller
      */
     public function store(Request $request, Vehicle $vehicle)
     {
-        $validated = $this->validateStoreData($request);
+        $validated = $this->validateStoreData($request, $vehicle);
 
         $validated['vehicle_id'] = $vehicle->id;
 
@@ -59,8 +59,9 @@ class OilChangeController extends Controller
 
         OilChange::create($validated);
         $vehicle->actual_km = $validated['actual_km'];
+        $vehicle->next_oil_change = $validated['actual_km'] + $vehicle->oil_period;
         $vehicle->save();
-        
+
         return redirect()->back()->with('success', 'Adicionado com sucesso!');
     }
 
@@ -70,7 +71,7 @@ class OilChangeController extends Controller
     public function destroy($Maintenance)
     {
         $Maintenance = OilChange::where('id', $Maintenance)->whereHas('vehicle', function ($query) {
-            $query->where('user_id', Auth()->id());
+            $query;
         })->delete();
         if ($Maintenance) {
             return redirect()->back()->with('success', 'Troca de óleo deletada.');
@@ -78,13 +79,17 @@ class OilChangeController extends Controller
         return redirect()->back()->with('error', 'Selecione uma troca de óleo existente.');
     }
 
-    protected function validateStoreData(Request $request)
+    protected function validateStoreData(Request $request, $vehicle)
     {
         $validator = Validator::make($request->all(), [
             'date' => 'required|date',
             'cost' => 'required|numeric|min:0|max:999999',
-            'actual_km' => 'required|integer',
-            'observation' => 'string'
+            'actual_km' => ['required', 'integer', function ($attribute, $value, $fail) use ($vehicle) {
+            if ($value < $vehicle->actual_km) {
+                $fail("O valor de 'actual_km' deve ser maior ou igual a {$vehicle->actual_km}.");
+            }
+        }],
+            'observation' => 'nullable|string'
         ]);
 
         if ($validator->fails()) {

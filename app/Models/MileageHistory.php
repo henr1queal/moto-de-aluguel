@@ -10,7 +10,7 @@ class MileageHistory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['actual_km', 'vehicle_id', 'rental_id', 'observation'];
+    protected $fillable = ['actual_km', 'date', 'vehicle_id', 'rental_id', 'observation'];
 
     /**
      * Get the vehicle that owns the MileageHistory

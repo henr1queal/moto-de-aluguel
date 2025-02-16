@@ -170,16 +170,13 @@
                         <div class="col-12 mt-2">
                             <small><strong>Última revisão:</strong></small>
                             @if ($vehicle->latestMaintenance)
-                                <small>{{ date('d/m/Y', strtotime($vehicle->latestMaintenance->date)) }}.</small>
+                                <small>{{ date('d/m/Y', strtotime($vehicle->latestMaintenance->date)) }} |
+                                    {{ $vehicle->latestMaintenance->actual_km }}</small>
                             @else
                                 <small>N/A</small>
                             @endif
                             @php
-                                $latestMaintenanceKm = $vehicle->latestMaintenance->actual_km ?? 0;
-                                $revisionPeriod = $vehicle->revision_period; // Período de revisão em km
-                                $actualKm = $vehicle->actual_km; // Quilometragem atual do veículo
-                                $nextMaintenanceKm = $latestMaintenanceKm + $revisionPeriod; // Quilometragem para a próxima revisão
-                                $kmRemaining = $nextMaintenanceKm - $actualKm;
+                                $kmRemaining = $vehicle->next_revision - $vehicle->actual_km;
                             @endphp
                             <br><small><strong>Próxima revisão:</strong> <span
                                     class="@if ($kmRemaining < 0) text-danger @else text-success @endif">{{ $kmRemaining }}</span>
@@ -192,21 +189,7 @@
                             @endif
                             <br><small><strong>Próxima troca de óleo:</strong></small>
                             @php
-                                // Cálculo para a próxima troca de óleo
-                                $oilPeriod = $vehicle->oil_period; // Período de troca de óleo em km
-                                $latestOilChangeKm = 0; // Inicializa a quilometragem da última troca de óleo
-
-                                if ($vehicle->latestMaintenance) {
-                                    if ($vehicle->latestMaintenance->have_oil_change == 1) {
-                                        // Se a última manutenção incluiu troca de óleo
-                                        $latestOilChangeKm = $vehicle->latestMaintenance->actual_km;
-                                    } else {
-                                        // Se a última manutenção não incluiu troca de óleo, verifica o latestOilChange
-                                        $latestOilChangeKm = $vehicle->latestOilChange->actual_km ?? 0;
-                                    }
-                                }
-                                $nextOilChangeKm = $latestOilChangeKm + $oilPeriod; // Quilometragem para a próxima troca de óleo
-                                $oilKmRemaining = $nextOilChangeKm - $actualKm; // Quilômetros restantes para a troca de óleo
+                                $oilKmRemaining = $vehicle->next_oil_change - $vehicle->actual_km;
                             @endphp
                             <small>
                                 <span
@@ -237,9 +220,9 @@
                     onsubmit="return confirm('Tem certeza que deseja deletar este veículo?');">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn-sm btn btn-danger" @disabled($vehicle->actualRental)><svg xmlns="http://www.w3.org/2000/svg"
-                            width="16" height="16" fill="currentColor" class="bi bi-trash me-1"
-                            viewBox="0 0 16 16">
+                    <button type="submit" class="btn-sm btn btn-danger" @disabled($vehicle->actualRental)><svg
+                            xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-trash me-1" viewBox="0 0 16 16">
                             <path
                                 d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
                             <path

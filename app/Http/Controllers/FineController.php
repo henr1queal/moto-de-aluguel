@@ -43,7 +43,7 @@ class FineController extends Controller
     public function store(Request $request, string $vehicle)
     {
         $validated = $this->validateStoreData($request);
-        $vehicle = Vehicle::where('id', $vehicle)->where('user_id', Auth()->id())->with('actualRental:id,vehicle_id')->first();
+        $vehicle = Vehicle::where('id', $vehicle)->with('actualRental:id,vehicle_id')->first();
 
         if (!$vehicle) {
             return redirect()->back()->with('error', 'Selecione um veículo existente.');
@@ -104,7 +104,7 @@ class FineController extends Controller
     public function destroy($fine)
     {
         $fine = Fine::where('id', $fine)->whereHas('vehicle', function ($query) {
-            $query->where('user_id', Auth()->id());
+            $query;
         })->delete();
         if (!$fine) {
             return redirect()->back()->with('error', 'Selecione uma multa existente.');

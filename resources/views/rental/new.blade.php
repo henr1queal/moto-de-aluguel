@@ -11,6 +11,34 @@
     </style>
 @endsection
 @section('content')
+    @if (session('success') || session('error'))
+        <div class="toast-container position-fixed end-0 p-3" style="z-index: 1055; bottom: 10%;">
+            @if (session('success'))
+                <div id="success" class="toast align-items-center text-bg-success border-0" role="alert"
+                    aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="2500">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            {{ session('success') }}
+                        </div>
+                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
+                            aria-label="Close"></button>
+                    </div>
+                </div>
+            @endif
+            @if (session('error'))
+                <div id="error" class="toast align-items-center text-bg-danger border-0" role="alert"
+                    aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="2500">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            {{ session('error') }}
+                        </div>
+                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
+                            aria-label="Close"></button>
+                    </div>
+                </div>
+            @endif
+        </div>
+    @endif
     <div class="container">
         <div class="row g-0">
             <div class="col text-center">
@@ -19,7 +47,7 @@
         </div>
         <div class="row mt-4 g-3">
             <div class="col mt-0">
-                <form method="POST" action="{{ route('rental.store') }}">
+                <form method="POST" action="{{ route('rental.store') }}" enctype="multipart/form-data">
                     @csrf
                     <div><small><strong>Dados sobre o locador:</strong></small></div>
                     <div class="mt-3">
@@ -53,8 +81,8 @@
                                     class="text-danger"><strong>*</strong></span></label>
                             @error('driver_license_number')
                                 <input type="text" class="form-control bg-transparent border-danger"
-                                    id="driver_license_number" value="{{ old('driver_license_number') ?? null }}"
-                                    required name="driver_license_number">
+                                    id="driver_license_number" value="{{ old('driver_license_number') ?? null }}" required
+                                    name="driver_license_number">
                                 <small class="very-small text-danger">Apenas números</small>
                             @else
                                 <input type="text" class="form-control bg-transparent" id="driver_license_number"
@@ -73,7 +101,8 @@
                                 <small class="very-small text-danger">Data válida</small>
                             @else
                                 <input type="date" class="form-control bg-transparent" id="driver_license_issue_date"
-                                    value="{{ old('driver_license_issue_date') ?? null }}" required name="driver_license_issue_date">
+                                    value="{{ old('driver_license_issue_date') ?? null }}" required
+                                    name="driver_license_issue_date">
                             @enderror
                         </div>
                         <div class="col mt-0">
@@ -284,8 +313,11 @@
                                                 {{-- Veículo individual --}}
                                                 <div class="col-4 text-center">
                                                     <div class="vehicle rounded-3 py-2 {{ $borderDanger }}">
-                                                        <input type="radio" @checked(old('vehicle_id') && old('vehicle_id') === $vehicle->id)
-                                                            required name="vehicle_id" value="{{ $vehicle->id }}" @required(!old('vehicle_id'))>
+                                                        <input type="radio" @checked(old('vehicle_id') && old('vehicle_id') === $vehicle->id) required
+                                                            name="vehicle_id" value="{{ $vehicle->id }}"
+                                                            @required(!old('vehicle_id'))
+                                                            data-revision="{{ $vehicle->revision_period }}"
+                                                            data-oil="{{ $vehicle->oil_period }}">
                                                         <br><small>{{ $vehicle->brand }} {{ $vehicle->model }}</small>
                                                         <br><small>{{ $vehicle->license_plate }}</small>
                                                         <br><small>KM: {{ $vehicle->actual_km }}</small>
@@ -368,6 +400,32 @@
                 @else
                     <input type="text" class="form-control bg-transparent" id="deposit"
                         value="{{ old('deposit') ?? null }}" required name="deposit" maxlength="6">
+                @enderror
+            </div>
+            <div class="col mt-0">
+                <label for="deposit" class="form-label fw-light">Dia pagamento<span
+                        class="text-danger"><strong>*</strong></span></label>
+                @error('deposit')
+                    <select required name="payment_day" class="form-control bg-transparent" id="payment_day">
+                        <option class="text-black" @selected(old('payment_day') && old('payment_day') == 'Sunday') value="Sunday">Domingo</option>
+                        <option class="text-black" @selected(old('payment_day') && old('payment_day') == 'Monday') value="Monday">Segunda-feira</option>
+                        <option class="text-black" @selected(old('payment_day') && old('payment_day') == 'Tuesday') value="Tuesday">Terça-feira</option>
+                        <option class="text-black" @selected(old('payment_day') && old('payment_day') == 'Wednesday') value="Wednesday">Quarta-feira</option>
+                        <option class="text-black" @selected(old('payment_day') && old('payment_day') == 'Thursday') value="Thursday">Quinta-feira</option>
+                        <option class="text-black" @selected(old('payment_day') && old('payment_day') == 'Friday') value="Friday">Sexta-feira</option>
+                        <option class="text-black" @selected(old('payment_day') && old('payment_day') == 'Saturday') value="Saturday">Sábado</option>
+                    </select>
+                    <small class="very-small text-danger">Apenas números</small>
+                @else
+                    <select required name="payment_day" class="form-control bg-transparent" id="payment_day">
+                        <option class="text-black" @selected(old('payment_day') && old('payment_day') == 'Sunday') value="Sunday">Domingo</option>
+                        <option class="text-black" @selected(old('payment_day') && old('payment_day') == 'Monday') value="Monday">Segunda-feira</option>
+                        <option class="text-black" @selected(old('payment_day') && old('payment_day') == 'Tuesday') value="Tuesday">Terça-feira</option>
+                        <option class="text-black" @selected(old('payment_day') && old('payment_day') == 'Wednesday') value="Wednesday">Quarta-feira</option>
+                        <option class="text-black" @selected(old('payment_day') && old('payment_day') == 'Thursday') value="Thursday">Quinta-feira</option>
+                        <option class="text-black" @selected(old('payment_day') && old('payment_day') == 'Friday') value="Friday">Sexta-feira</option>
+                        <option class="text-black" @selected(old('payment_day') && old('payment_day') == 'Saturday') value="Saturday">Sábado</option>
+                    </select>
                 @enderror
             </div>
         </div>
@@ -464,7 +522,6 @@
 
                             cityInput.value = data.localidade || null
                             if (complementInput.value !== '') {
-                                console.log(1)
                                 cityInput.dispatchEvent(new Event('input'));
                             }
 
@@ -487,17 +544,32 @@
 
             document.querySelectorAll('.vehicle').forEach(vehicle => {
                 vehicle.addEventListener('click', () => {
+                    // Remover a borda vermelha de qualquer veículo anteriormente marcado como erro
                     document.querySelectorAll('.vehicle.border-danger').forEach(el => {
-                        el.classList.remove('border-danger')
-                    })
+                        el.classList.remove('border-danger');
+                    });
 
-                    const input = vehicle.querySelector(
-                        '[name="vehicle_id"]');
+                    // Captura o input radio dentro do veículo clicado
+                    const input = vehicle.querySelector('[name="vehicle_id"]');
                     if (input) {
                         input.checked = true;
+
+                        // Pegamos os valores de revisão e troca de óleo a partir do input selecionado
+                        const revisionPeriod = input.getAttribute("data-revision");
+                        const oilPeriod = input.getAttribute("data-oil");
+                        
+                        // Preenchendo os inputs com os valores do veículo selecionado
+                        document.getElementById("revision_period").value = revisionPeriod || '';
+                        document.getElementById("oil_period").value = oilPeriod || '';
                     }
                 });
             });
+
+            let selectedVehicle = document.querySelector("input[name='vehicle_id']:checked");
+            if (selectedVehicle) {
+                selectedVehicle.closest('.vehicle').click(); // Simula o clique para preencher os valores
+            }
+
 
             document.querySelectorAll('input, textarea').forEach(field => {
                 field.addEventListener('input', () => {
@@ -514,6 +586,17 @@
                     }
                 });
             });
+
+            const toastElements = document.querySelectorAll('.toast');
+            toastElements.forEach(toastElement => {
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
+            });
+
+            disableSubmit = () => {
+                const submitButton = document.getElementById('submit');
+                submitButton.disabled = true;
+            }
 
         });
     </script>

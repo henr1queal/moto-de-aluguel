@@ -31,9 +31,11 @@ return new class extends Migration
             $table->string('city');
             $table->string('neighborhood');
             $table->string('street');
+            $table->string('payment_day');
             $table->string('house_number')->nullable();
             $table->string('complement')->nullable();
-            $table->string('photo');
+            $table->string('photo')->nullable();
+            $table->text('observation')->nullable();
             $table->foreignUuid('vehicle_id')->constrained()->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();

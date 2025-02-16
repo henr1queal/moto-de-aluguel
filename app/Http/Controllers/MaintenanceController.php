@@ -42,25 +42,45 @@ class MaintenanceController extends Controller
      */
     public function store(Request $request, Vehicle $vehicle)
     {
-        $validated = $this->validateStoreData($request);
+        try {
+            $validated = $this->validateStoreData($request, $vehicle);
 
-        $validated['vehicle_id'] = $vehicle->id;
+            $validated['vehicle_id'] = $vehicle->id;
 
-        if ($vehicle->user_id !== Auth()->id()) {
-            return response()->json(['error' => 'Selecione um veículo existente.'], 400);
+            if ($vehicle->user_id !== auth()->id()) {
+                return redirect()->back()->with('error', 'Selecione um veículo existente.');
+            }
+
+            $actualRental = $vehicle->actualRental()->select('id', 'vehicle_id', 'finished_at')->first();
+            if ($actualRental) {
+                $validated['rental_id'] = $actualRental->id;
+            }
+
+            // Criar a manutenção
+            Maintenance::create($validated);
+
+            // Atualizar dados do veículo
+            if ($validated['actual_km'] >= $vehicle->actual_km) {
+                $vehicle->actual_km = $validated['actual_km'];
+            }
+            $vehicle->next_revision = $validated['actual_km'] + $vehicle->revision_period;
+
+            if ($validated['have_oil_change']) {
+                $vehicle->next_oil_change = $validated['actual_km'] + $vehicle->oil_period;
+            }
+
+            $vehicle->save();
+
+            return redirect()->back()->with('success', 'Sucesso! O veículo foi atualizado.');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->errors()) // Retorna os erros para a sessão
+                ->withInput() // Mantém os inputs preenchidos
+                ->with('error', 'Erro adicionar manutenção.');
+        } catch (\Throwable $th) {
+            return redirect()->back()
+                ->with('error', 'Erro interno no servidor. Tente novamente mais tarde.');
         }
-
-        $actualRental = $vehicle->actualRental()->select('id', 'vehicle_id', 'finished_at')->first();
-
-        if ($actualRental) {
-            $validated['rental_id'] = $actualRental->id;
-        }
-
-        Maintenance::create($validated);
-        $vehicle->actual_km = $validated['actual_km'];
-        $vehicle->save();
-        
-        return redirect()->back()->with('success', 'Adicionado com sucesso!');
     }
 
     /**
@@ -69,7 +89,7 @@ class MaintenanceController extends Controller
     public function destroy($Maintenance)
     {
         $Maintenance = Maintenance::where('id', $Maintenance)->whereHas('vehicle', function ($query) {
-            $query->where('user_id', Auth()->id());
+            $query;
         })->delete();
         if ($Maintenance) {
             return redirect()->back()->with('success', 'Manutenção deletada.');
@@ -77,24 +97,18 @@ class MaintenanceController extends Controller
         return redirect()->back()->with('error', 'Selecione uma manutenção existente.');
     }
 
-    protected function validateStoreData(Request $request)
+    protected function validateStoreData(Request $request, Vehicle $vehicle)
     {
-        $validator = Validator::make($request->all(), [
+        return $request->validate([
             'date' => 'required|date',
             'cost' => 'required|numeric|min:0|max:999999',
-            'actual_km' => 'required|integer',
+            'actual_km' => ['required', 'integer', function ($attribute, $value, $fail) use ($vehicle) {
+                if ($value < $vehicle->actual_km) {
+                    $fail("O valor de 'actual_km' deve ser maior ou igual a {$vehicle->actual_km}.");
+                }
+            }],
             'have_oil_change' => 'required|boolean',
-            'observation' => 'string'
+            'observation' => 'nullable|string'
         ]);
-
-        if ($validator->fails()) {
-            // Retorna os dados validados parcialmente e os erros
-            throw ValidationException::withMessages([
-                'errors' => $validator->errors(),
-                'validated' => $validator->validated(),
-            ]);
-        }
-
-        return $validator->validated();
     }
 }

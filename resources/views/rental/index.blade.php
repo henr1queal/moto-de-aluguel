@@ -2,11 +2,17 @@
 @section('head')
     <style>
         .placa {
-            bottom: -14%;
+            bottom: -26px;
+        }
+
+        @media(min-width: 992px) {
+            .placa {
+                bottom: -57px !important;
+            }
         }
 
         .info-placa {
-            bottom: 19%;
+            top: 25%;
             z-index: 2;
             left: 50%;
             transform: translateX(-50%);
@@ -52,35 +58,63 @@
         </div>
     @endif
     <div class="container">
-        <div class="row g-0">
+        <div class="row g-0 mb-3">
             <div class="col text-center">
                 <h1 style="font-size: 20px;">Minhas locações</h1>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col text-end">
+                <form action="{{ route('rental.index') }}" method="GET">
+                    <label for="filter" class="fw-light">Filtrar:</label>
+                    <select name="filter" id="filter" class="form-select d-inline w-auto bg-transparent text-white"
+                        onchange="this.form.submit()">
+                        <option class="text-black" value="todos" {{ $filter === 'todos' ? 'selected' : '' }}>Todos</option>
+                        <option class="text-black" value="ativos" {{ $filter === 'ativos' ? 'selected' : '' }}>Ativos
+                        </option>
+                        <option class="text-black" value="cancelados" {{ $filter === 'cancelados' ? 'selected' : '' }}>
+                            Cancelados</option>
+                        <option class="text-black" value="finalizados" {{ $filter === 'finalizados' ? 'selected' : '' }}>
+                            Finalizados</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+
         <div class="row mt-4 g-3">
             @if ($myRentals->count() === 0)
                 <div class="col-12 text-center">
-                    <span class="text-secondary">Adicione uma locação para vê-la aqui.</span>
+                    <span class="text-secondary">Nenhuma locação encontrada para esse filtro.</span>
                 </div>
             @else
                 @foreach ($myRentals as $rental)
-                    <div class="col-6 mb-4">
+                    <div class="col-6 col-lg-2 mb-4 mb-lg-5">
                         <a href="{{ route('rental.show', ['rental' => $rental->id]) }}"
                             class="text-decoration-none text-white">
-                            <div class="vehicle rounded-4 text-center pt-2 pb-5 position-relative">
+                            <div class="vehicle rounded-4 text-center pt-2 pb-5 pb-lg-3 position-relative">
                                 <small><strong>{{ $rental->landlord_name }}</strong></small>
                                 <br><small>{{ $rental->vehicle->brand }}</small>
                                 <br><small>{{ $rental->vehicle->model }} {{ $rental->vehicle->year }}</small>
                                 @if ($rental->finished_at === null)
-                                    <br><small class="text-success"><strong>Ativa / @if($rental->has_overdue_payments) <span class="text-warning">Com pendências</span> @else Em dia @endif</strong></small>
+                                    <br><small class="text-success"><strong>Ativa /
+                                            @if ($rental->has_overdue_payments)
+                                                <span class="text-warning">Com pendências</span>
+                                            @else
+                                                Em dia
+                                            @endif
+                                        </strong></small>
+                                @elseif($rental->stop_date !== null)
+                                    <br><small class="text-danger"><strong>Cancelada</strong></small>
                                 @else
                                     <br><small class="text-danger"><strong>Finalizada</strong></small>
                                 @endif
                                 <div class="placa position-absolute w-100">
                                     <div class="position-relative">
                                         <img src="{{ asset('assets/svg/placa.svg') }}" alt="" class="w-100">
-                                        <span
-                                            class="fs-4 w-100 text-black position-absolute info-placa"><strong>{{ $rental->vehicle->license_plate }}</strong></span>
+                                        <span class="fs-4 w-100 text-black position-absolute info-placa">
+                                            <strong>{{ $rental->vehicle->license_plate }}</strong>
+                                        </span>
                                     </div>
                                 </div>
                             </div>

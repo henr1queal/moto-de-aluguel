@@ -16,7 +16,7 @@ return new class extends Migration
             $table->decimal('cost', 10, 2);
             $table->integer('actual_km');
             $table->date('date');
-            $table->text('observation');
+            $table->text('observation')->nullable();
             $table->foreignUuid('vehicle_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('rental_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('maintenance_id')->nullable()->constrained()->onDelete('cascade');
