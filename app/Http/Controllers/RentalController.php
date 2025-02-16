@@ -20,7 +20,7 @@ class RentalController extends Controller
      */
     public function index(Request $request)
     {
-        $filter = $request->input('filter', 'todos'); // Pega o filtro ou usa "todos" como padrão
+        $filter = $request->input('filter', 'ativos'); // Pega o filtro ou usa "todos" como padrão
 
         $query = Auth()->user()->rentals();
 
