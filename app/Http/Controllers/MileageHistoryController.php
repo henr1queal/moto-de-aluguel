@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\MileageHistory;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class MileageHistoryController extends Controller
@@ -15,6 +14,7 @@ class MileageHistoryController extends Controller
      */
     public function index(string $vehicle, string $rental = null)
     {
+
         $mileageHistory = MileageHistory::where('vehicle_id', $vehicle);
         if ($rental) {
             $mileageHistory = $mileageHistory->where('rental_id', $rental);

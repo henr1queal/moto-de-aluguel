@@ -429,18 +429,18 @@
             <div class="row g-3 mt-3">
                 <div class="col mt-0">
                     <label for="observation" class="form-label fw-light">Observação</label>
-                    <textarea @disabled($rental->finished_at) rows="3" class="form-control bg-transparent text-white" id="observation" name="observation"
-                        maxlength="1000">{{ $rental->observation ?? null }}</textarea>
+                    <textarea @disabled($rental->finished_at) rows="3" class="form-control bg-transparent text-white"
+                        id="observation" name="observation" maxlength="1000">{{ $rental->observation ?? null }}</textarea>
                 </div>
             </div>
-            <div class="row g-3 mt-5 mb-5">
+            <div class="row g-3 mt-5 mb-5 align-items-center">
                 <div class="col mt-0 text-center">
                     <input @disabled($rental->finished_at) type="submit" value="Atualizar" class="btn btn-success btn-lg">
                 </div>
             </div>
         </form>
-        <div class="row mt-4">
-            <div class="col">
+        <div class="row mt-4 mb-5">
+            <div class="col-auto">
                 <button data-bs-toggle="modal" data-bs-target="#finishRental" type="submit"
                     class="btn-sm btn btn-danger" @disabled($rental->finished_at)><svg xmlns="http://www.w3.org/2000/svg"
                         width="16" height="16" fill="currentColor" class="bi bi-stop-fill mb-1"
@@ -544,6 +544,7 @@
                         <div class="row align-items-center">
                             <div class="col-auto">
                                 <small class="text-white"><strong>Histórico de quilometragem diária:</strong></small>
+                                <small class="d-block" id="latestUpdate">Última atualização: </small>
                             </div>
                             <div class="col text-end"><button class="btn btn-primary btn-sm rounded-3 border-white fs-6"
                                     @disabled($rental->finished_at) data-bs-toggle="modal"
@@ -1140,6 +1141,29 @@
             return `${day}/${month}/${year}`;
         }
 
+        function updateLatestUpdate(createdAt) {
+            const date = new Date(createdAt);
+            const today = new Date();
+            const yesterday = new Date();
+            yesterday.setDate(today.getDate() - 1);
+
+            // Zerando horas para comparação precisa
+            today.setHours(0, 0, 0, 0);
+            yesterday.setHours(0, 0, 0, 0);
+            date.setHours(0, 0, 0, 0);
+            const textContentLatestUpdate = latestUpdate.textContent;
+            if (date.getTime() === today.getTime()) {
+                latestUpdate.textContent = textContentLatestUpdate + 'Hoje';
+                latestUpdate.classList.add('text-success');
+            } else if (date.getTime() === yesterday.getTime()) {
+                latestUpdate.textContent = textContentLatestUpdate + 'Ontem';
+                latestUpdate.classList.add('text-warning');
+            } else {
+                latestUpdate.textContent = textContentLatestUpdate + formattedDate(createdAt);
+                latestUpdate.classList.add('text-danger');
+            }
+
+        }
 
         function fetchMileageData(page = 1) {
             const apiUrl = `/km-diaria/{{ $rental->vehicle->id }}/{{ $rental->id }}?page=${page}`;
@@ -1148,8 +1172,13 @@
                 .then(response => response.json())
                 .then(data => {
                     const resultsContainer = document.getElementById('kmDiariaModalBody');
+                    const latestUpdate = document.getElementById('latestUpdate');
+                    let latestUpdateData = null;
                     if (data && data.data.length > 0) {
                         let html = '';
+                        latestUpdateData = data.data[0].created_at;
+
+                        updateLatestUpdate(latestUpdateData);
 
                         data.data.forEach((item) => {
                             const collapseId = `collapse-${item.count}`;
@@ -1309,7 +1338,8 @@
                 data.data.forEach((item) => {
                     const collapseId = `collapse-${item.id}`;
 
-                    html += `
+                    html +=
+                        `
                 <div class="row mb-3" style="border-bottom: 1px solid white; padding-bottom: 8px;">
                     <div class="col-12 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
                         <span>${item.count}. ${formattedDate(item.date)}</span>
@@ -1323,10 +1353,11 @@
                         <div class="row">
                             <div class="col">
                                 <p><strong>Quilometragem da moto:</strong> ${item.actual_km ?? 'Sem observações.'}</p>`;
-                                if(sectionTitle === 'Manutenção') {
-                                    html += `<p><strong>Houve troca de óleo:</strong> ${item.have_oil_change === 1 ? 'Sim' : 'Não'}</p>`;
-                                }
-                                html += `
+                    if (sectionTitle === 'Manutenção') {
+                        html +=
+                            `<p><strong>Houve troca de óleo:</strong> ${item.have_oil_change === 1 ? 'Sim' : 'Não'}</p>`;
+                    }
+                    html += `
                                 <p><strong>Observação:</strong> ${item.observation ?? 'Sem observações.'}</p>
                             </div>
                         </div>
