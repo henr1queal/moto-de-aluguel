@@ -58,6 +58,7 @@ class VehicleController extends Controller
             'year' => 'required|integer|between:2010,2026',
             'oil_period' => 'required|integer',
             'protection_value' => 'required|numeric|min:0',
+            'observation' => 'nullable|string',
         ]);
 
         $validated['user_id'] = auth()->id();
@@ -129,6 +130,7 @@ class VehicleController extends Controller
                 'year' => 'required|integer|between:2010,2026',
                 'oil_period' => 'required|integer',
                 'protection_value' => 'required|numeric|min:0',
+                'observation' => 'nullable|string',
             ]);
 
             // Exclui os campos brand e model para garantir que não sejam atualizados

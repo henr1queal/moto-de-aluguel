@@ -25,6 +25,7 @@ return new class extends Migration
             $table->integer('next_oil_change', false, true);
             $table->integer('next_revision', false, true);
             $table->decimal('protection_value');
+            $table->text('observation');
             $table->foreignUuid('user_id')->constrained();
             $table->timestamps();
             $table->softDeletes();

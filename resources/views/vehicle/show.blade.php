@@ -137,6 +137,12 @@
                             @enderror
                         </div>
                     </div>
+                    <div class="row mt-3">
+                        <div class="col mt-0">
+                            <label for="observation" class="form-label fw-light">Observação</label>
+                            <textarea type="text" class="form-control bg-transparent text-white" id="observation" name="observation" required rows="3"> {{ old('observation') ? old('observation') : $vehicle->observation }}</textarea>
+                        </div>
+                    </div>
                     <div class="mt-4"><small><strong>Manutenções e revisões:</strong></small></div>
                     <div class="row g-3 mt-3">
                         <div class="col mt-0">

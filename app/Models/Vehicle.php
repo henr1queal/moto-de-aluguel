@@ -27,7 +27,8 @@ class Vehicle extends Model
         'first_declared_km',
         'next_oil_change',
         'next_revision',
-        'user_id'
+        'user_id',
+        'observation'
     ];
 
     protected $keyType = 'string'; // Indica que a chave primária é uma string.
