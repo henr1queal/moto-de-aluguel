@@ -10,6 +10,7 @@ use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VehicleController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -75,16 +76,26 @@ Route::get('/financas/{vehicle}/{rental?}', [PaymentController::class, 'show'])-
 Route::put('/financas/{payment}', [PaymentController::class, 'update'])->middleware(['auth'])->name('payment.update');
 Route::get('/financas', [PaymentController::class, 'index'])->name('payment.index'); // Página inicial
 
-Route::get('/usuarios', [UserController::class, 'index'])->name('user.index');
-Route::post('/usuarios/adicionar', [UserController::class, 'store'])->name('user.store');
-Route::post('/usuarios/{user}/gerar-nova-senha', [UserController::class, 'generateNewPassword'])->name('user.new-password');
-Route::post('/usuarios/{user}/mudar-tipo', [UserController::class, 'toggleRole'])->name('user.toggle-role');
+Route::get('/usuarios', [UserController::class, 'index'])->name('user.index')->middleware(['auth']);
+Route::post('/usuarios/adicionar', [UserController::class, 'store'])->name('user.store')->middleware(['auth']);
+Route::post('/usuarios/{user}/gerar-nova-senha', [UserController::class, 'generateNewPassword'])->name('user.new-password')->middleware(['auth']);
+Route::post('/usuarios/{user}/mudar-tipo', [UserController::class, 'toggleRole'])->name('user.toggle-role')->middleware(['auth']);
 
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::get('/clear-cache', function () {
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    Artisan::call('config:cache');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+
+    return response()->json(['message' => 'Cache limpo com sucesso!']);
 });
 
 require __DIR__ . '/auth.php';

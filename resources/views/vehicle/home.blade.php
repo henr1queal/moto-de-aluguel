@@ -75,8 +75,8 @@
                 @foreach ($myVehicles as $vehicle)
                     <div class="col-6 col-lg-2 mb-4 mb-lg-5">
                         <a href="{{ route('vehicle.show', ['vehicle' => $vehicle->id]) }}"
-                            class="text-decoration-none text-white position-relative">
-                            <div class="vehicle rounded-2 text-center pt-1 position-relative">
+                            class="h-100 text-decoration-none text-white position-relative">
+                            <div class="h-100 vehicle rounded-2 text-center pt-1 position-relative d-flex flex-column justify-content-between">
                                 <div class="px-1">
                                     <small>{{ $vehicle->brand }}</small>
                                     <br><small>{{ $vehicle->model }}</small>

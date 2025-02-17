@@ -91,8 +91,8 @@
                 @foreach ($myRentals as $rental)
                     <div class="col-6 col-lg-2 mb-4 mb-lg-5">
                         <a href="{{ route('rental.show', ['rental' => $rental->id]) }}"
-                            class="text-decoration-none text-white position-relative">
-                            <div class="vehicle rounded-2 text-center pt-1 position-relative">
+                            class="h-100 text-decoration-none text-white position-relative">
+                            <div class="h-100 vehicle rounded-2 text-center pt-1 position-relative d-flex flex-column justify-content-between">
                                 <div class="px-1">
                                     <div>
                                         <img src="{{ route('photo.show', ['rental' => $rental->id]) }}" style="max-width: 100px" class="img-fluid rounded-5">
