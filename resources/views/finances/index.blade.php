@@ -69,7 +69,7 @@
             </div>
         </div>
 
-        @foreach (['em_andamento' => 'Locações Ativas', 'cancelados' => 'Locações Canceladas', 'finalizados' => 'Locações Finalizadas'] as $key => $title)
+        @foreach (['em_andamento' => 'Locações Ativas'] as $key => $title)
             <div class="row justify-content-center">
                 <div class="col-8 col-md-4 mb-4">
                     <div class="finance-card bg-{{ $key }} rounded-4 p-2" style="border: 1px solid white">

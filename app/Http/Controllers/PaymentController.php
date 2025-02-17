@@ -53,8 +53,6 @@ class PaymentController extends Controller
         // Filtros por categoria de aluguel
         $filters = [
             'em_andamento' => fn($q) => $q->whereNull('finished_at'),
-            'cancelados'   => fn($q) => $q->whereNotNull('finished_at')->whereNotNull('stop_date'),
-            'finalizados'  => fn($q) => $q->whereNotNull('finished_at')->whereNull('stop_date'),
         ];
 
         // Calculando os totais por categoria
