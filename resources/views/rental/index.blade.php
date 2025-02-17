@@ -12,7 +12,7 @@
         }
 
         .info-placa {
-            top: 25%;
+            top: 33%;
             z-index: 2;
             left: 50%;
             transform: translateX(-50%);
@@ -91,31 +91,34 @@
                 @foreach ($myRentals as $rental)
                     <div class="col-6 col-lg-2 mb-4 mb-lg-5">
                         <a href="{{ route('rental.show', ['rental' => $rental->id]) }}"
-                            class="text-decoration-none text-white">
-                            <div class="vehicle rounded-4 text-center pt-2 pb-5 pb-lg-3 position-relative">
-                                <small><strong>{{ $rental->landlord_name }}</strong></small>
-                                <br><small>{{ $rental->vehicle->brand }}</small>
-                                <br><small>{{ $rental->vehicle->model }} {{ $rental->vehicle->year }}</small>
-                                @if ($rental->finished_at === null)
-                                    <br><small class="text-success"><strong>Ativa /
-                                            @if ($rental->has_overdue_payments)
-                                                <span class="text-warning">Com pendências</span>
-                                            @else
-                                                Em dia
-                                            @endif
-                                        </strong></small>
-                                @elseif($rental->stop_date !== null)
-                                    <br><small class="text-danger"><strong>Cancelada</strong></small>
-                                @else
-                                    <br><small class="text-danger"><strong>Finalizada</strong></small>
-                                @endif
-                                <div class="placa position-absolute w-100">
-                                    <div class="position-relative">
-                                        <img src="{{ asset('assets/svg/placa.svg') }}" alt="" class="w-100">
-                                        <span class="fs-4 w-100 text-black position-absolute info-placa">
-                                            <strong>{{ $rental->vehicle->license_plate }}</strong>
-                                        </span>
+                            class="text-decoration-none text-white position-relative">
+                            <div class="vehicle rounded-2 text-center pt-1 position-relative">
+                                <div class="px-1">
+                                    <div>
+                                        <img src="{{ route('photo.show', ['rental' => $rental->id]) }}" style="max-width: 100px" class="img-fluid rounded-5">
                                     </div>
+                                    <small><strong>{{ $rental->landlord_name }}</strong></small>
+                                    <br><small>{{ $rental->vehicle->brand }}</small>
+                                    <br><small>{{ $rental->vehicle->model }} {{ $rental->vehicle->year }}</small>
+                                    @if ($rental->finished_at === null)
+                                        <br><small class="text-success"><strong>Ativa /
+                                                @if ($rental->has_overdue_payments)
+                                                    <span class="text-warning">Com pendências</span>
+                                                @else
+                                                    Em dia
+                                                @endif
+                                            </strong></small>
+                                    @elseif($rental->stop_date !== null)
+                                        <br><small class="text-danger"><strong>Cancelada</strong></small>
+                                    @else
+                                        <br><small class="text-danger"><strong>Finalizada</strong></small>
+                                    @endif
+                                </div>
+                                <div class="position-relative">
+                                    <img src="{{ asset('assets/svg/placa.svg') }}" alt="" class="w-100">
+                                    <span class="fs-4 w-100 text-black position-absolute info-placa">
+                                        <strong>{{ $rental->vehicle->license_plate }}</strong>
+                                    </span>
                                 </div>
                             </div>
                         </a>

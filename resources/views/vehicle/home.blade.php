@@ -6,7 +6,7 @@
                 bottom: -57px !important;
             }
         }
-        
+
         .placa {
             bottom: -26px;
             z-index: 2;
@@ -17,8 +17,8 @@
 
         .info-placa {
             left: 50%;
-            transform: translate(-50%, -40%);
-            top: 50%;
+            transform: translateX(-50%);
+            top: 33%;
         }
 
         .vehicle {
@@ -73,25 +73,26 @@
                 </div>
             @else
                 @foreach ($myVehicles as $vehicle)
-                    <div class="col-6 col-lg-2 mb-lg-5 mb-4">
+                    <div class="col-6 col-lg-2 mb-4 mb-lg-5">
                         <a href="{{ route('vehicle.show', ['vehicle' => $vehicle->id]) }}"
-                            class="text-decoration-none text-white">
-                            <div class="vehicle rounded-4 text-center pt-2 pb-5 pb-lg-4 position-relative">
-                                <small>{{ $vehicle->brand }}</small>
-                                <br><small>{{ $vehicle->model }}</small>
-                                <br><small>ANO: {{ $vehicle->year }}</small>
-                                <br>
-                                @if ($vehicle->actualRental)
-                                    <small class="text-warning">ALUGADA</small>
-                                @else
-                                    <small class="text-success">DISPONÍVEL</small>
-                                @endif
-                                <div class="placa position-absolute w-100">
-                                    <div class="position-relative">
-                                        <img src="{{ asset('assets/svg/placa.svg') }}" alt="" class="w-100">
-                                        <span
-                                            class="fs-4 w-100 text-black position-absolute info-placa"><strong>{{ $vehicle->license_plate }}</strong></span>
-                                    </div>
+                            class="text-decoration-none text-white position-relative">
+                            <div class="vehicle rounded-2 text-center pt-1 position-relative">
+                                <div class="px-1">
+                                    <small>{{ $vehicle->brand }}</small>
+                                    <br><small>{{ $vehicle->model }}</small>
+                                    <br><small>ANO: {{ $vehicle->year }}</small>
+                                    <br>
+                                    @if ($vehicle->actualRental)
+                                        <small class="text-warning">ALUGADA</small>
+                                    @else
+                                        <small class="text-success">DISPONÍVEL</small>
+                                    @endif
+                                </div>
+                                <div class="position-relative">
+                                    <img src="{{ asset('assets/svg/placa.svg') }}" alt="" class="w-100">
+                                    <span class="fs-4 w-100 text-black position-absolute info-placa">
+                                        <strong>{{ $vehicle->license_plate }}</strong>
+                                    </span>
                                 </div>
                             </div>
                         </a>
