@@ -67,7 +67,7 @@
         <div class="row">
             <div class="col text-end">
                 <form action="{{ route('rental.index') }}" method="GET">
-                    <label for="filter" class="fw-light">Filtrar:</label>
+                    <label for="filter" class="fw-light me-1">Filtrar:</label>
                     <select name="filter" id="filter" class="form-select d-inline w-auto bg-transparent text-white"
                         onchange="this.form.submit()">
                         <option class="text-black" value="todos" {{ $filter === 'todos' ? 'selected' : '' }}>Todos</option>
@@ -130,8 +130,7 @@
 @endsection
 @section('options-button')
     <div class="container text-end pe-4">
-        <a href="{{ route('rental.new') }}" class="btn btn-light fs-1 py-0 rounded-3 text-decoration-none"
-            style="height: 44px;">
+        <a href="{{ route('rental.new') }}" class="btn btn-light fs-1 py-0 rounded-3 text-decoration-none">
             <strong>+</strong>
         </a>
     </div>
