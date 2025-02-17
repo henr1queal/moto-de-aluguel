@@ -99,7 +99,16 @@ class VehicleController extends Controller
     public function show(Vehicle $vehicle)
     {
         $vehicle->load('actualRental');
-        return view('vehicle.show', compact('vehicle'));
+        $previousVehicle = Vehicle::where('created_at', '<', $vehicle->created_at)
+            ->orderByDesc('created_at')
+            ->limit(1)
+            ->first();
+
+        $nextVehicle = Vehicle::where('created_at', '>', $vehicle->created_at)
+            ->orderBy('created_at')
+            ->limit(1)
+            ->first();
+        return view('vehicle.show', compact('vehicle', 'previousVehicle', 'nextVehicle'));
     }
 
     /**

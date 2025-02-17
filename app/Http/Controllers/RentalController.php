@@ -123,7 +123,18 @@ class RentalController extends Controller
         ];
         $rental->load(['vehicle.latestMaintenance', 'vehicle.latestOilChange']);
         $rental->payment_day = $days[$rental->payment_day];
-        return view('rental.show', compact('rental'));
+
+        $previousRental = Rental::where('created_at', '<', $rental->created_at)
+            ->orderByDesc('created_at')
+            ->limit(1)
+            ->first();
+
+        $nextRental = Rental::where('created_at', '>', $rental->created_at)
+            ->orderBy('created_at')
+            ->limit(1)
+            ->first();
+
+        return view('rental.show', compact('rental', 'previousRental', 'nextRental'));
     }
 
     /**
@@ -414,7 +425,7 @@ class RentalController extends Controller
             'stop_date' => 'required|date',
             'finish_observation' => 'nullable|string',
         ]);
-        
+
         $validated['finished_at'] = $validated['stop_date'];
         if ($rental->payments()->where('paid', 0)->count() === 0) {
             $validated['stop_date'] = null;
