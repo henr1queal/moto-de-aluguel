@@ -32,11 +32,14 @@
         }
 
         .menu {
-            height: 8dvh;
             background-color: #1f1f1f;
             border-top: 1px solid #303030;
             position: fixed;
-            width: 100dvw;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+            /* Garante que o menu fique acima de outros conteúdos */
         }
     </style>
     @yield('head')
