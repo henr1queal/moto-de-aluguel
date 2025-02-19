@@ -125,11 +125,13 @@ class RentalController extends Controller
         $rental->payment_day = $days[$rental->payment_day];
 
         $previousRental = Rental::where('created_at', '<', $rental->created_at)
-            ->orderByDesc('created_at')
-            ->limit(1)
-            ->first();
-
+        ->whereNull('finished_at')
+        ->orderByDesc('created_at')
+        ->limit(1)
+        ->first();
+        
         $nextRental = Rental::where('created_at', '>', $rental->created_at)
+        ->whereNull('finished_at')
             ->orderBy('created_at')
             ->limit(1)
             ->first();

@@ -92,10 +92,9 @@ class VehicleController extends Controller
             ->with('success', 'Veículo criado com sucesso!');
     }
 
-
     /**
-     * Display the specified resource.
-     */
+    * Display the specified resource.
+    */
     public function show(Vehicle $vehicle)
     {
         $vehicle->load('actualRental');
@@ -112,8 +111,8 @@ class VehicleController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
+    * Show the form for editing the specified resource.
+    */
     public function edit(Vehicle $vehicle)
     {
         //
@@ -162,7 +161,6 @@ class VehicleController extends Controller
                 ->with('error', 'Houve um erro inesperado ao atualizar.');
         }
     }
-
 
     /**
      * Remove the specified resource from storage.
