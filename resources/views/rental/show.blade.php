@@ -1201,15 +1201,8 @@
             fetch(apiUrl)
                 .then(response => response.json())
                 .then(data => {
-                    const resultsContainer = document.getElementById('kmDiariaModalBody');
-                    const latestUpdate = document.getElementById('latestUpdate');
-                    let latestUpdateData = null;
                     if (data && data.data.length > 0) {
                         let html = '';
-                        latestUpdateData = data.data[0].created_at;
-
-                        updateLatestUpdate(latestUpdateData);
-
                         data.data.forEach((item) => {
                             const collapseId = `collapse-${item.count}`;
                             const observationId = `observation-${item.id}`;
