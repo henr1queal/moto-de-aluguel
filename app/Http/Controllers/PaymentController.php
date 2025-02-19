@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\Rental;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -11,6 +12,7 @@ class PaymentController extends Controller
     /**
      * Display a listing of the resource.
      */
+
     public function index()
     {
         $now = Carbon::now();
@@ -21,11 +23,75 @@ class PaymentController extends Controller
             ->orderBy('month', 'asc')
             ->pluck('month');
 
-        // Define o mês e semana atuais
+        // Define o mês e a **semana correta**
         $selectedMonth = $now->format('Y-m');
-        $selectedWeek = $now->weekOfYear;
+        $selectedWeek = $now->copy()->weekOfYear; // Pegamos a semana atual correta
 
-        return view('finances.index', compact('months', 'selectedMonth', 'selectedWeek'));
+        // Define o início e fim da **semana atual**
+        $startOfWeek = $now->copy()->startOfWeek(Carbon::SUNDAY);
+        $endOfWeek = $startOfWeek->copy()->endOfWeek(Carbon::SATURDAY);
+
+        // Recupera pagamentos **com rental** dentro da semana
+        $payments = Payment::with('rental:id,landlord_name')
+            ->whereHas('rental', function($query){
+                $query->whereNull('finished_at');
+            })
+            ->whereBetween('payment_date', [$startOfWeek, $endOfWeek])
+            ->get();
+
+        // Estrutura inicial para a semana
+        $weekData = collect([
+            'Sunday'    => ['day' => 'Domingo', 'vencidos' => 0, 'pendentes' => 0, 'pagos' => 0, 'total' => 0, 'rentals' => ['pendentes' => [], 'pagos' => [], 'vencidos' => []]],
+            'Monday'    => ['day' => 'Segunda-feira', 'vencidos' => 0, 'pendentes' => 0, 'pagos' => 0, 'total' => 0, 'rentals' => ['pendentes' => [], 'pagos' => [], 'vencidos' => []]],
+            'Tuesday'   => ['day' => 'Terça-feira', 'vencidos' => 0, 'pendentes' => 0, 'pagos' => 0, 'total' => 0, 'rentals' => ['pendentes' => [], 'pagos' => [], 'vencidos' => []]],
+            'Wednesday' => ['day' => 'Quarta-feira', 'vencidos' => 0, 'pendentes' => 0, 'pagos' => 0, 'total' => 0, 'rentals' => ['pendentes' => [], 'pagos' => [], 'vencidos' => []]],
+            'Thursday'  => ['day' => 'Quinta-feira', 'vencidos' => 0, 'pendentes' => 0, 'pagos' => 0, 'total' => 0, 'rentals' => ['pendentes' => [], 'pagos' => [], 'vencidos' => []]],
+            'Friday'    => ['day' => 'Sexta-feira', 'vencidos' => 0, 'pendentes' => 0, 'pagos' => 0, 'total' => 0, 'rentals' => ['pendentes' => [], 'pagos' => [], 'vencidos' => []]],
+            'Saturday'  => ['day' => 'Sábado', 'vencidos' => 0, 'pendentes' => 0, 'pagos' => 0, 'total' => 0, 'rentals' => ['pendentes' => [], 'pagos' => [], 'vencidos' => []]],
+        ]);
+
+        // Processa pagamentos e associa os rentals corretamente
+        foreach ($payments as $payment) {
+            $dayOfWeek = Carbon::parse($payment->payment_date)->format('l');
+
+            if (!$weekData->has($dayOfWeek)) {
+                continue;
+            }
+
+            $dayData = $weekData[$dayOfWeek];
+
+            // Define se é um pagamento pendente, vencido ou pago
+            if ($payment->paid) {
+                $dayData['pagos']++;
+            } elseif (Carbon::parse($payment->payment_date)->isPast()) {
+                $dayData['vencidos']++;
+            } else {
+                $dayData['pendentes']++;
+            }
+
+            $dayData['total']++;
+
+            // Se o pagamento está associado a um aluguel, categorizamos corretamente
+            if ($payment->rental) {
+                $rentalData = [
+                    'id' => $payment->rental->id,
+                    'name' => $payment->rental->landlord_name,
+                    'cost' => $payment->cost,
+                ];
+
+                if (!$payment->paid && Carbon::parse($payment->payment_date)->isPast()) {
+                    $dayData['rentals']['vencidos'][] = $rentalData;
+                } elseif (!$payment->paid) {
+                    $dayData['rentals']['pendentes'][] = $rentalData;
+                } else {
+                    $dayData['rentals']['pagos'][] = $rentalData;
+                }
+            }
+
+            $weekData->put($dayOfWeek, $dayData);
+        }
+
+        return view('finances.index', compact('months', 'startOfWeek', 'endOfWeek', 'weekData', 'selectedMonth', 'selectedWeek'));
     }
 
     public function getTotals(Request $request)
@@ -46,6 +112,7 @@ class PaymentController extends Controller
         // Função para filtrar pagamentos por status de locação
         $getPaymentsByStatus = function ($statusQuery) {
             return Payment::whereHas('rental', function ($query) use ($statusQuery) {
+                $query->whereNull('finished_at');
                 $statusQuery($query);
             });
         };
