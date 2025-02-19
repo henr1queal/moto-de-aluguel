@@ -85,6 +85,11 @@ class Vehicle extends Model
     {
         return $this->hasOne(Maintenance::class)->orderByDesc('date')->latest();
     }
+    
+    public function latestMileage(): HasOne
+    {
+        return $this->hasOne(MileageHistory::class)->orderByDesc('date')->latest();
+    }
 
     public function latestOilChange(): HasOne
     {
