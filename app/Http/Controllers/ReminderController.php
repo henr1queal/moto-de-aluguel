@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\Vehicle;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 
 class ReminderController extends Controller
 {
@@ -71,7 +70,8 @@ class ReminderController extends Controller
                     'placa' => $vehicle->license_plate,
                     'km_restante' => $oilKmRemaining,
                     'person' => $vehicle->actualRental->landlord_name,
-                    'rental' => $vehicle->actualRental->id
+                    'rental' => $vehicle->actualRental->id,
+                    'latestMileage' => $vehicle->latestMileage
                 ];
             }
         }

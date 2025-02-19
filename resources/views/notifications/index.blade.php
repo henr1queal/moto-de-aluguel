@@ -44,8 +44,19 @@
                             <strong>{{ $oil['person'] }}</strong>
                             <br>🏍️ <strong>{{ $oil['veiculo'] }} ({{ $oil['placa'] }})</strong> -
                             <span class="{{ $oil['km_restante'] <= 0 ? 'text-danger' : 'text-warning' }}">
-                                {{ abs($oil['km_restante']) }} km
-                            </span>
+                                <strong>{{ abs($oil['km_restante']) }} km</strong>
+                            </span> — Última KM Diária:
+                            @if ($oil['latestMileage'])
+                                @if ($oil['latestMileage']->created_at->format('d/m/Y') === now()->format('d/m/Y'))
+                                    <span
+                                        class="text-success"><strong>{{ $oil['latestMileage']->created_at->format('d/m/Y') }}</strong></span>
+                                @else
+                                    <span
+                                        class="text-warning"><strong>{{ $oil['latestMileage']->created_at->format('d/m/Y') }}</strong></span>
+                                @endif
+                            @else
+                                <span class="text-danger"><strong>N/A</strong></span>
+                            @endif
                         </a>
                     @endforeach
                 </ul>
