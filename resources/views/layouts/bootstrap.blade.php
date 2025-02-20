@@ -25,21 +25,31 @@
         }
 
         .content {
-            height: 90dvh;
-            padding-top: 30px;
             overflow-y: auto;
-            margin-bottom: 2dvh;
+        }
+
+        .menu-button {
+            margin-top: 10px;
+        }
+        
+        .menu-button a {
+            max-height: 44.3px;            
         }
 
         .menu {
             background-color: #1f1f1f;
             border-top: 1px solid #303030;
             position: fixed;
-            bottom: 0;
             left: 0;
             width: 100%;
             z-index: 9999;
             /* Garante que o menu fique acima de outros conteúdos */
+        }
+
+        @media(min-width: 1200px) {
+            .fs-1 {
+                font-size: 1.8rem !important;
+            }
         }
     </style>
     @yield('head')
@@ -47,7 +57,9 @@
 
 <body>
     <div class="content">
+        <div style="height: 50px"></div>
         @yield('content')
+        <div style="height: 50px;"></div>
     </div>
     @yield('options-button')
     <div class="menu bottom-0 rounded-top-5 pt-2">

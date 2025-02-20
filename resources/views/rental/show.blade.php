@@ -10,8 +10,7 @@
         }
 
         .content {
-            height: 85dvh;
-            margin-bottom: 10px;
+            height: calc(100dvh - 60px - 70px);
         }
     </style>
 @endsection
@@ -439,7 +438,7 @@
                 </div>
             </div>
         </form>
-        <div class="row mt-4 mb-5">
+        <div class="row mt-4">
             <div class="col-auto">
                 <button data-bs-toggle="modal" data-bs-target="#finishRental" type="submit"
                     class="btn-sm btn btn-danger" @disabled($rental->finished_at)><svg xmlns="http://www.w3.org/2000/svg"
@@ -932,7 +931,7 @@
     </div>
 @endsection
 @section('options-button')
-    <div class="container text-end pe-4">
+    <div class="container text-end pe-4 menu-button">
         <div class="btn-group dropup-center dropup">
             <button type="button" class="btn btn-light fs-1 py-0 rounded-3" data-bs-toggle="dropdown"
                 aria-expanded="false" style="height: 44px;">

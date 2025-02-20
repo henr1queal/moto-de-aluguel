@@ -1,14 +1,23 @@
 @extends('layouts.bootstrap')
-
+@section('head')
+<style>
+    .notificacao-secao {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        border: 1px solid white;
+    }
+</style>
+@endsection
 @section('content')
     <div class="container text-center">
-        <h1>🔔 Notificações e Lembretes</h1>
+        <h3>🔔 Notificações e Lembretes</h3>
 
-        <h3 class="text-center mt-5 pt-lg-4">Pagamentos</h3>
+        <h4 class="text-center mt-5 pt-lg-4">Pagamentos</h4>
 
         <!-- Notificações de Pagamentos -->
         @foreach (['hoje' => '⚠️ Hoje', 'faltam_1_dia' => '⏳ Falta  1 dia', 'faltam_2_dias' => '⌛ Faltam 2 dias', 'vencidos' => '❌ Vencidos'] as $key => $label)
-            <div class="notificacao-secao mt-5">
+            <div class="notificacao-secao mt-4">
                 <h6>{{ $label }}</h6>
                 @if (count($notifications[$key]) > 0)
                     <ul class="list-group">
@@ -31,10 +40,10 @@
             </div>
         @endforeach
 
-        <h3 class="text-center mt-5 pt-lg-4">Trocas de óleo e manutenções</h3>
+        <h4 class="text-center mt-5 pt-lg-4">Trocas de óleo e manutenções</h4>
 
         <!-- Notificações de Trocas de Óleo -->
-        <div class="notificacao-secao mt-5">
+        <div class="notificacao-secao mt-4">
             <h4 class="mb-2">🛢️ Próximas Trocas de Óleo</h4>
             @if (count($oilChanges) > 0)
                 <ul class="list-group">
@@ -100,16 +109,6 @@
         </div>
     </div>
 @endsection
-
-<style>
-    .notificacao-secao {
-        margin-top: 20px;
-        padding: 15px;
-        border-radius: 5px;
-        border: 1px solid white;
-    }
-</style>
-
 @section('scripts')
     <script>
         document.addEventListener("DOMContentLoaded", function() {

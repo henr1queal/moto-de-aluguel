@@ -26,8 +26,7 @@
         }
 
         .content {
-            height: 85dvh;
-            margin-bottom: 10px;
+            height: calc(100dvh - 60px - 70px);
         }
     </style>
 @endsection
@@ -103,7 +102,7 @@
     </div>
 @endsection
 @section('options-button')
-    <div class="container text-end pe-4">
+    <div class="container text-end pe-4 menu-button">
         <a href="{{ route('vehicle.new') }}" class="btn btn-light fs-1 py-0 rounded-3 text-decoration-none">
             <strong>+</strong>
         </a>

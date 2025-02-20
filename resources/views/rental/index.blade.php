@@ -19,12 +19,15 @@
         }
 
         .content {
-            height: 85dvh;
-            margin-bottom: 10px;
+            height: calc(100dvh - 60px - 70px);
         }
 
         .vehicle {
             border: 1px solid white;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.514) !important;
         }
     </style>
 @endsection
@@ -67,17 +70,50 @@
         <div class="row">
             <div class="col text-end">
                 <form action="{{ route('rental.index') }}" method="GET">
-                    <label for="filter" class="fw-light me-1">Filtrar:</label>
-                    <select name="filter" id="filter" class="form-select d-inline w-auto bg-transparent text-white"
-                        onchange="this.form.submit()">
-                        <option class="text-black" value="todos" {{ $filter === 'todos' ? 'selected' : '' }}>Todos</option>
-                        <option class="text-black" value="ativos" {{ $filter === 'ativos' ? 'selected' : '' }}>Ativos
-                        </option>
-                        <option class="text-black" value="cancelados" {{ $filter === 'cancelados' ? 'selected' : '' }}>
-                            Cancelados</option>
-                        <option class="text-black" value="finalizados" {{ $filter === 'finalizados' ? 'selected' : '' }}>
-                            Finalizados</option>
-                    </select>
+                    <div class="row justify-content-center">
+                        <div class="col-12 text-center">
+                            <small class="text-white">Filtrar por:</small>
+                            <br>
+                            <select name="filter" id="filter"
+                                class="form-select d-inline w-auto bg-transparent text-white" onchange="this.form.submit()">
+                                <option class="text-black" value="todos" {{ $filter === 'todos' ? 'selected' : '' }}>Todos
+                                </option>
+                                <option class="text-black" value="ativos" {{ $filter === 'ativos' ? 'selected' : '' }}>
+                                    Ativos</option>
+                                <option class="text-black" value="cancelados"
+                                    {{ $filter === 'cancelados' ? 'selected' : '' }}>Cancelados</option>
+                                <option class="text-black" value="finalizados"
+                                    {{ $filter === 'finalizados' ? 'selected' : '' }}>Finalizados</option>
+                            </select>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12 text-center">
+                                <small class="text-white">Pesquisar por:</small>
+                            </div>
+                            <div class="col-lg-4 mx-auto">
+                                <div class="d-flex gap-2">
+                                    <input type="text" name="search" id="search"
+                                        class="form-control d-inline bg-transparent text-white"
+                                        placeholder="Nome do Locador ou Placa" value="{{ $search }}">
+                                    <button type="submit" class="btn btn-primary"><svg xmlns="http://www.w3.org/2000/svg"
+                                            width="16" height="16" fill="currentColor" class="bi bi-search"
+                                            viewBox="0 0 16 16">
+                                            <path
+                                                d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                                        </svg></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @if ($search)
+                        <div class="row mt-2">
+                            <div class="col text-center">
+                                <a href="{{ route('rental.index', ['filter' => $filter]) }}">
+                                    ❌ Limpar pesquisa
+                                </a>
+                            </div>
+                        </div>
+                    @endif
                 </form>
             </div>
         </div>
@@ -92,10 +128,12 @@
                     <div class="col-6 col-lg-2 mb-4 mb-lg-5">
                         <a href="{{ route('rental.show', ['rental' => $rental->id]) }}"
                             class="h-100 text-decoration-none text-white position-relative">
-                            <div class="h-100 vehicle rounded-2 text-center pt-1 position-relative d-flex flex-column justify-content-between">
+                            <div
+                                class="h-100 vehicle rounded-2 text-center pt-1 position-relative d-flex flex-column justify-content-between">
                                 <div class="px-1">
                                     <div>
-                                        <img src="{{ route('photo.show', ['rental' => $rental->id]) }}" style="max-width: 100px" class="img-fluid rounded-5">
+                                        <img src="{{ route('photo.show', ['rental' => $rental->id]) }}"
+                                            style="max-width: 100px" class="img-fluid rounded-5">
                                     </div>
                                     <small><strong>{{ $rental->landlord_name }}</strong></small>
                                     <br><small>{{ $rental->vehicle->brand }}</small>
@@ -129,7 +167,7 @@
     </div>
 @endsection
 @section('options-button')
-    <div class="container text-end pe-4">
+    <div class="container text-end pe-4 menu-button">
         <a href="{{ route('rental.new') }}" class="btn btn-light fs-1 py-0 rounded-3 text-decoration-none">
             <strong>+</strong>
         </a>

@@ -48,8 +48,8 @@
         </div>
 
         <!-- Filtro por MÊS -->
-        <div class="row mb-3">
-            <div class="col">
+        <div class="row mb-5 justify-content-center gap-md-3">
+            <div class="col col-md-auto">
                 <h5>Mensal</h5>
                 <select id="monthFilter" class="form-select bg-transparent">
                     @foreach ($months as $month)
@@ -60,11 +60,7 @@
                     @endforeach
                 </select>
             </div>
-        </div>
-
-        <!-- Filtro por SEMANA -->
-        <div class="row mb-4">
-            <div class="col">
+            <div class="col col-md-auto">
                 <h5>Semanal</h5>
                 <select id="weekFilter" class="form-select bg-transparent"></select>
             </div>
