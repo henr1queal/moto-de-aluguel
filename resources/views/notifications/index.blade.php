@@ -97,7 +97,7 @@
 
         <h3 class="text-center mt-5 pt-lg-4">✉️ Multas</h3>
 
-        <div class="notificacao-secao mt-5">
+        <div class="notificacao-secao mt-4">
             <div id="quinta-feira-container">
                 <div class="alert alert-info mb-0" id="quinta-feira-alert" style="display: none;">
                     📌 <strong>Lembrete semanal:</strong> <br>Verificar possíveis multas.

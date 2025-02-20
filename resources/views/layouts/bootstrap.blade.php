@@ -59,7 +59,7 @@
     <div class="content">
         <div style="height: 50px"></div>
         @yield('content')
-        <div style="height: 50px;"></div>
+        <div style="height: 85px;"></div>
     </div>
     @yield('options-button')
     <div class="menu bottom-0 rounded-top-5 pt-2">
