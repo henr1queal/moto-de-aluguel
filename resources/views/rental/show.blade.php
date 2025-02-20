@@ -1197,10 +1197,10 @@
 
         function fetchMileageData(page = 1) {
             const apiUrl = `/km-diaria/{{ $rental->vehicle->id }}/{{ $rental->id }}?page=${page}`;
-
             fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => {
+            .then(response => response.json())
+            .then(data => {
+                const resultsContainer = document.getElementById('kmDiariaModalBody');
                     if (data && data.data.length > 0) {
                         let html = '';
                         data.data.forEach((item) => {
