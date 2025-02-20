@@ -20,10 +20,15 @@ class RentalController extends Controller
      */
     public function index(Request $request)
     {
-        $filter = $request->input('filter', 'ativos'); // Pega o filtro ou usa "todos" como padrão
+        $search = $request->input('search', '');
+        $filter = $request->input('filter', 'ativos'); // Filtro padrão 'ativos'
 
-        $query = Auth()->user()->rentals();
+        // Obtém os aluguéis do usuário autenticado e adiciona o join corretamente
+        $query = Auth()->user()->rentals()
+            ->join('vehicles as v', 'rentals.vehicle_id', '=', 'v.id') // Evita conflito de alias
+            ->select('rentals.*');
 
+        // Aplica o filtro baseado na opção selecionada
         switch ($filter) {
             case 'ativos':
                 $query->whereNull('finished_at'); // Apenas ativos (não finalizados)
@@ -38,19 +43,30 @@ class RentalController extends Controller
                 break;
         }
 
+        // Aplica a pesquisa se houver um termo fornecido
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('rentals.landlord_name', 'like', '%' . $search . '%')
+                    ->orWhere('v.license_plate', 'like', '%' . $search . '%'); // Usando o alias 'v'
+            });
+        }
+
+        // Ordenação e paginação
         $myRentals = $query
             ->orderByRaw('finished_at IS NULL DESC')
             ->orderBy('finished_at', 'desc')
             ->paginate(10);
 
+        // Adiciona flag de pagamentos atrasados para os ativos
         foreach ($myRentals as $rental) {
             if ($rental->finished_at === null) {
                 $rental->has_overdue_payments = $rental->hasOverduePayments();
             }
         }
 
-        return view('rental.index', compact('myRentals', 'filter'));
+        return view('rental.index', compact('myRentals', 'search', 'filter'));
     }
+
 
 
     /**
@@ -125,13 +141,13 @@ class RentalController extends Controller
         $rental->payment_day = $days[$rental->payment_day];
 
         $previousRental = Rental::where('created_at', '<', $rental->created_at)
-        ->whereNull('finished_at')
-        ->orderByDesc('created_at')
-        ->limit(1)
-        ->first();
-        
+            ->whereNull('finished_at')
+            ->orderByDesc('created_at')
+            ->limit(1)
+            ->first();
+
         $nextRental = Rental::where('created_at', '>', $rental->created_at)
-        ->whereNull('finished_at')
+            ->whereNull('finished_at')
             ->orderBy('created_at')
             ->limit(1)
             ->first();
