@@ -32,9 +32,9 @@
             margin-top: 10px;
         }
         
-        .menu-button a {
+        /* .menu-button a {
             max-height: 44.3px;            
-        }
+        } */
 
         .menu {
             background-color: #1f1f1f;
