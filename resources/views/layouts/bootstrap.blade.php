@@ -51,6 +51,11 @@
                 font-size: 1.8rem !important;
             }
         }
+
+        .modal-content {
+            max-height: 70dvh;
+            overflow-y: auto;
+        }
     </style>
     @yield('head')
 </head>
