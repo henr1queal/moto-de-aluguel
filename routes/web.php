@@ -33,13 +33,13 @@ Route::get('/locacoes', [RentalController::class, 'index'])->middleware(['auth']
 Route::get('/locacoes/{rental}', [RentalController::class, 'show'])->middleware(['auth'])->name('rental.show');
 Route::post('/locacoes', [RentalController::class, 'store'])->middleware(['auth'])->name('rental.store');
 Route::patch('/locacoes/{rental}', [RentalController::class, 'update'])->middleware(['auth'])->name('rental.patch');
-Route::delete('/rental/photo/{rental}', [RentalController::class, 'deletePhoto'])->middleware('auth')->name('photo.delete');
-Route::get('/rental/photo/{rental}', [RentalController::class, 'photo'])->middleware('auth')->name('photo.show');
-Route::post('/locacoes/{rental}/finalizar', [RentalController::class, 'finish'])->name('rentals.finish');
+Route::delete('/rental/photo/{rental}', [RentalController::class, 'deletePhoto'])->middleware(['auth'])->name('photo.delete');
+Route::get('/rental/photo/{rental}', [RentalController::class, 'photo'])->middleware(['auth'])->name('photo.show');
+Route::post('/locacoes/{rental}/finalizar', [RentalController::class, 'finish'])->middleware(['auth'])->name('rentals.finish');
 
 
-Route::get('/notificacoes', [ReminderController::class, 'getNotifications'])->middleware('auth')->name('notifications');
-Route::get('/notificacoes/contagem', [ReminderController::class, 'getNotificationsCount'])->middleware('auth');
+Route::get('/notificacoes', [ReminderController::class, 'getNotifications'])->middleware(['auth'])->name('notifications');
+Route::get('/notificacoes/contagem', [ReminderController::class, 'getNotificationsCount'])->middleware(['auth']);
 
 Route::view('/veiculos/adicionar', 'vehicle.new')->middleware(['auth'])->name('vehicle.new');
 Route::get('/veiculos', [VehicleController::class, 'index'])->middleware(['auth'])->name('vehicle.index');
@@ -51,16 +51,19 @@ Route::patch('/veiculos/{vehicle}', [VehicleController::class, 'update'])->middl
 Route::get('/km-diaria/{vehicle}/{rental?}', [MileageHistoryController::class, 'index'])->middleware(['auth'])->name('milleage.show');
 Route::post('/km-diaria/{vehicle}', [MileageHistoryController::class, 'store'])->middleware(['auth'])->name('milleage.store');
 Route::delete('/km-diaria/{vehicle}', [MileageHistoryController::class, 'destroy'])->middleware(['auth'])->name('milleage.delete');
-Route::patch('/km-diaria/{id}', [MileageHistoryController::class, 'updateObservation']);
+Route::patch('/km-diaria/{id}', [MileageHistoryController::class, 'updateObservation'])->middleware(['auth']);
 
 
 Route::get('/manutencao/{vehicle}/{rental?}', [MaintenanceController::class, 'index'])->middleware(['auth'])->name('maintenance.show');
 Route::post('/manutencao/{vehicle}', [MaintenanceController::class, 'store'])->middleware(['auth'])->name('maintenance.store');
 Route::delete('/manutencao/{vehicle}', [MaintenanceController::class, 'destroy'])->middleware(['auth'])->name('maintenance.delete');
+Route::patch('/manutencao/{id}', [MaintenanceController::class, 'updateObservation'])->middleware(['auth']);
+
 
 Route::get('/troca-de-oleo/{vehicle}/{rental?}', [OilChangeController::class, 'index'])->middleware(['auth'])->name('oil-change.show');
 Route::post('/troca-de-oleo/{vehicle}', [OilChangeController::class, 'store'])->middleware(['auth'])->name('oil-change.store');
 Route::delete('/troca-de-oleo/{vehicle}', [OilChangeController::class, 'destroy'])->middleware(['auth'])->name('oil-change.delete');
+Route::patch('/troca-de-oleo/{id}', [OilChangeController::class, 'updateObservation'])->middleware(['auth']);
 
 Route::put('/multa/{fine}', [FineController::class, 'update'])->middleware(['auth'])->name('fine.update');
 Route::post('/multa/{vehicle}', [FineController::class, 'store'])->middleware(['auth'])->name('fine.store');
@@ -70,11 +73,11 @@ Route::get('/multa/{vehicle}/{rental?}', [FineController::class, 'index'])->midd
 Route::get('/financas/totais', [PaymentController::class, 'getTotals'])
     ->middleware(['auth'])
     ->name('payment.totals');
-    Route::get('/financas/semanas', [PaymentController::class, 'getWeeks'])->name('payment.weeks');
+Route::get('/financas/semanas', [PaymentController::class, 'getWeeks'])->middleware(['auth'])->name('payment.weeks');
 
 Route::get('/financas/{vehicle}/{rental?}', [PaymentController::class, 'show'])->middleware(['auth'])->name('payment.show');
 Route::put('/financas/{payment}', [PaymentController::class, 'update'])->middleware(['auth'])->name('payment.update');
-Route::get('/financas', [PaymentController::class, 'index'])->name('payment.index'); // Página inicial
+Route::get('/financas', [PaymentController::class, 'index'])->middleware(['auth'])->name('payment.index'); // Página inicial
 
 Route::get('/usuarios', [UserController::class, 'index'])->name('user.index')->middleware(['auth']);
 Route::post('/usuarios/adicionar', [UserController::class, 'store'])->name('user.store')->middleware(['auth']);
@@ -82,7 +85,7 @@ Route::post('/usuarios/{user}/gerar-nova-senha', [UserController::class, 'genera
 Route::post('/usuarios/{user}/mudar-tipo', [UserController::class, 'toggleRole'])->name('user.toggle-role')->middleware(['auth']);
 
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -96,6 +99,6 @@ Route::get('/clear-cache', function () {
     Artisan::call('view:clear');
 
     return response()->json(['message' => 'Cache limpo com sucesso!']);
-});
+})->middleware(['auth']);
 
 require __DIR__ . '/auth.php';

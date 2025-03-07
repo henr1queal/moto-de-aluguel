@@ -33,7 +33,7 @@ class PaymentController extends Controller
 
         // Recupera pagamentos **com rental** dentro da semana
         $payments = Payment::with('rental:id,landlord_name')
-            ->whereHas('rental', function($query){
+            ->whereHas('rental', function ($query) {
                 $query->whereNull('finished_at');
             })
             ->whereBetween('payment_date', [$startOfWeek, $endOfWeek])
@@ -156,22 +156,26 @@ class PaymentController extends Controller
             return response()->json([]);
         }
 
-        // Obtém o primeiro e o último dia do mês selecionado
         $startOfMonth = Carbon::createFromFormat('Y-m', $selectedMonth)->startOfMonth();
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
-        // Obtém as semanas dentro desse intervalo
         $weeks = [];
         $currentDate = $startOfMonth->copy();
 
         while ($currentDate->lessThanOrEqualTo($endOfMonth)) {
-            $weeks[] = $currentDate->weekOfYear;
+            $startOfWeek = $currentDate->copy()->startOfWeek(Carbon::SUNDAY);
+            $endOfWeek = $currentDate->copy()->endOfWeek(Carbon::SATURDAY);
+            if ($startOfWeek->month === $startOfMonth->month) {
+                $weeks[] = [
+                    'week' => $currentDate->weekOfYear,
+                    'range' => 'de ' . $startOfWeek->format('d/m') . ' a ' . $endOfWeek->format('d/m')
+                ];
+            }
             $currentDate->addWeek();
         }
 
-        return response()->json(array_values(array_unique($weeks)));
+        return response()->json($weeks);
     }
-
 
     /**
      * Display the specified resource.

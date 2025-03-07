@@ -159,7 +159,7 @@
                 fetch(`/financas/totais?month=${month}&week=${week}`)
                     .then(response => response.json())
                     .then(data => {
-                        ['em_andamento'].forEach(status => {
+                        ["em_andamento"].forEach(status => {
                             document.getElementById(`totalReceived${capitalize(status)}`).textContent =
                                 `R$ ${(data[status]?.total?.received ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
                             document.getElementById(`totalNotReceived${capitalize(status)}`)
@@ -182,44 +182,31 @@
                     .catch(error => console.error('Erro ao carregar os dados:', error));
             }
 
-            function capitalize(str) {
-                return str.charAt(0).toUpperCase() + str.slice(1);
-            }
-
             function updateWeekFilter() {
                 const selectedMonth = monthFilter.value;
-
                 fetch(`/financas/semanas?month=${selectedMonth}`)
                     .then(response => response.json())
                     .then(weeks => {
                         weekFilter.innerHTML = "";
-
-                        weeks.forEach((week, index) => {
+                        weeks.forEach(week => {
                             let option = document.createElement("option");
-                            option.value = week;
-                            option.textContent = `Semana ${index + 1}`;
+                            option.value = week.week;
+                            option.textContent = week.range;
                             option.classList.add("text-black");
                             weekFilter.appendChild(option);
                         });
-
-                        // Define a semana atual corretamente
-                        const currentWeek = parseInt("{{ $selectedWeek }}");
-                        if (weeks.includes(currentWeek)) {
-                            weekFilter.value = currentWeek;
-                        } else {
-                            weekFilter.value = weeks[0]; // Fallback para a primeira semana válida
-                        }
-
-                        fetchTotals(monthFilter.value, weekFilter.value);
+                        weekFilter.value = weeks[0]?.week || "";
+                        fetchTotals(selectedMonth, weekFilter.value);
                     });
             }
 
-            // Event Listeners
             monthFilter.addEventListener("change", updateWeekFilter);
             weekFilter.addEventListener("change", () => fetchTotals(monthFilter.value, weekFilter.value));
-
-            // Inicializa o filtro de semanas ao carregar a página
             updateWeekFilter();
+
+            function capitalize(str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            }
 
             const modal = document.getElementById("detailsModal");
 
