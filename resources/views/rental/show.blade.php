@@ -1197,9 +1197,9 @@
         function fetchMileageData(page = 1) {
             const apiUrl = `/km-diaria/{{ $rental->vehicle->id }}/{{ $rental->id }}?page=${page}`;
             fetch(apiUrl)
-            .then(response => response.json())
-            .then(data => {
-                const resultsContainer = document.getElementById('kmDiariaModalBody');
+                .then(response => response.json())
+                .then(data => {
+                    const resultsContainer = document.getElementById('kmDiariaModalBody');
                     if (data && data.data.length > 0) {
                         let html = '';
                         data.data.forEach((item) => {
@@ -1229,7 +1229,7 @@
                                     <div class="col d-flex align-items-center">
                                         <p><strong>Observação:</strong> 
                                             <span id="${observationId}">${item.observation ?? 'Sem observações.'}</span>
-                                            <button ${isRentalFinished ? 'disabled' : ''} class="btn btn-sm btn-warning ms-2" id="${editBtnId}" onclick="enableEdit(${item.id})">
+                                            <button ${isRentalFinished ? 'disabled' : ''} class="btn btn-sm btn-warning ms-2" id="${editBtnId}" onclick="enableEdit('${item.id}')">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
   <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
 </svg>
@@ -1239,9 +1239,9 @@
                                 </div>
                                 <div class="row d-none" id="edit-container-${item.id}">
                                     <div class="col mb-4">
-                                        <textarea class="form-control mb-2" id="${textareaId}">${item.observation ?? ''}</textarea>
-                                        <button class="btn btn-outline-success btn-sm" id="${saveBtnId}" onclick="saveObservation(${item.id})">Atualizar observação</button>
-                                        <button class="btn btn-outline-danger btn-sm" id="${cancelBtnId}" onclick="disableEdit(${item.id})">Cancelar</button>
+                                        <textarea class="form-control mb-2 bg-transparent border-white border-1 text-white" id="${textareaId}">${item.observation ?? ''}</textarea>
+                                        <button class="btn btn-outline-success btn-sm" id="${saveBtnId}" onclick="saveObservation('${item.id}')">Atualizar observação</button>
+                                        <button class="btn btn-outline-danger btn-sm" id="${cancelBtnId}" onclick="disableEdit('${item.id}')">Cancelar</button>
                                     </div>
                                 </div>
                                 <form method="POST" action="/km-diaria/${item.id}" onsubmit="return confirm('Confirma deletar o anexo de ${formattedDate(item.created_at)}?');">
@@ -1361,10 +1361,10 @@
                     const collapseId = `collapse-${item.id}`;
 
                     html +=
-                        `
+                    `
                 <div class="row mb-3" style="border-bottom: 1px solid white; padding-bottom: 8px;">
                     <div class="col-12 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
-                        <span>${item.count}. ${formattedDate(item.date)}</span>
+                        <span>${item.count}. ${formattedDate(item.date)} ${item.observation ? '<strong class="text-danger">*</strong>' : ''}</span>
                         <span class="badge rounded-3 fs-6" style="border: 1px solid white;">R$ ${item.cost}</span>
                     </div>
                 </div>
@@ -1379,8 +1379,50 @@
                         html +=
                             `<p><strong>Houve troca de óleo:</strong> ${item.have_oil_change === 1 ? 'Sim' : 'Não'}</p>`;
                     }
+                    // Exibição da observação e botão de editar
+                    if (sectionTitle === 'Manutenção') {
+                        html += `
+                                <span><strong>Observação:</strong> <span id="observation-maintenance-${item.id}">${item.observation ?? 'Sem observações.'}</span></span>
+                                <button class="btn btn-sm btn-warning ms-2" onclick="enableEditMaintenance('${item.id}')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                                      <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293z"/>
+                                    </svg>
+                                </button>
+                `;
+                    } else if (sectionTitle === 'Troca de Óleo') {
+                        html += `
+                                <span><strong>Observação:</strong> <span id="observation-oilchange-${item.id}">${item.observation ?? 'Sem observações.'}</span></span>
+                                <button class="btn btn-sm btn-warning ms-2" onclick="enableEditOilChange('${item.id}')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                                      <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293z"/>
+                                    </svg>
+                                </button>
+                `;
+                    }
+                    // Container oculto para edição da observação
+                    if (sectionTitle === 'Manutenção') {
+                        html += `
+                                <div class="row d-none" id="edit-container-maintenance-${item.id}">
+                                    <div class="col mb-4">
+                                        <textarea class="form-control mb-2 bg-transparent border-white border-1 text-white" id="textarea-maintenance-${item.id}">${item.observation ?? ''}</textarea>
+                                        <button class="btn btn-outline-success btn-sm" onclick="saveObservationMaintenance('${item.id}')">Atualizar observação</button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="disableEditMaintenance('${item.id}')">Cancelar</button>
+                                    </div>
+                                </div>
+                `;
+                    } else if (sectionTitle === 'Troca de Óleo') {
+                        html += `
+                                <div class="row d-none" id="edit-container-oilchange-${item.id}">
+                                    <div class="col mb-4">
+                                        <textarea class="form-control mb-2 bg-transparent border-white border-1 text-white" id="textarea-oilchange-${item.id}">${item.observation ?? ''}</textarea>
+                                        <button class="btn btn-outline-success btn-sm" onclick="saveObservationOilChange('${item.id}')">Atualizar observação</button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="disableEditOilChange('${item.id}')">Cancelar</button>
+                                    </div>
+                                </div>
+                `;
+                    }
+
                     html += `
-                                <p><strong>Observação:</strong> ${item.observation ?? 'Sem observações.'}</p>
                             </div>
                         </div>
                         <form method="POST" action="/${sectionTitle === 'Manutenção' ? 'manutencao' : 'troca-de-oleo'}/${item.id}" onsubmit="return confirm('Confirma deletar a ${sectionTitle.toLowerCase()} de ${formattedDate(item.date)}?');">
@@ -1393,30 +1435,100 @@
             `;
                 });
 
-                // Adiciona controles de paginação
+                // Controles de paginação (os nomes das funções abaixo podem ser ajustados de acordo com sua implementação)
                 html += `
             <div class="pagination d-flex justify-content-between align-items-center mt-3">
-                <button 
-                    class="btn btn-sm btn-secondary" 
-                    ${data.current_page > 1 ? '' : 'disabled'} 
-                    onclick="fetchMaintenanceData(${data.current_page - 1})">
-                    Anterior
-                </button>
+                <button class="btn btn-sm btn-secondary" ${data.current_page > 1 ? '' : 'disabled'} onclick="${sectionTitle === 'Manutenção' ? 'fetchMaintenanceData' : 'fetchOilChangeData'}(${data.current_page - 1})">Anterior</button>
                 <span>Página ${data.current_page} de ${data.last_page}</span>
-                <button 
-                    class="btn btn-sm btn-secondary" 
-                    ${data.current_page < data.last_page ? '' : 'disabled'} 
-                    onclick="fetchMaintenanceData(${data.current_page + 1})">
-                    Próxima
-                </button>
+                <button class="btn btn-sm btn-secondary" ${data.current_page < data.last_page ? '' : 'disabled'} onclick="${sectionTitle === 'Manutenção' ? 'fetchMaintenanceData' : 'fetchOilChangeData'}(${data.current_page + 1})">Próxima</button>
             </div>
         `;
-
                 resultsContainer.innerHTML = html;
             } else {
                 resultsContainer.innerHTML = `Nenhum dado encontrado.`;
             }
         }
+
+        // Funções para Manutenção (Revisão)
+        function enableEditMaintenance(itemId) {
+            document.getElementById(`edit-container-maintenance-${itemId}`).classList.remove('d-none');
+        }
+
+        function disableEditMaintenance(itemId) {
+            document.getElementById(`edit-container-maintenance-${itemId}`).classList.add('d-none');
+        }
+
+        function saveObservationMaintenance(itemId) {
+            const textarea = document.getElementById(`textarea-maintenance-${itemId}`);
+            const observation = textarea.value;
+
+            fetch(`/manutencao/${itemId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        observation: observation
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Observação atualizada!');
+                        document.getElementById(`observation-maintenance-${itemId}`).textContent = observation ||
+                            'Sem observações.';
+                        disableEditMaintenance(itemId);
+                    } else {
+                        alert('Erro ao atualizar observação.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao atualizar observação:', error);
+                    alert('Erro ao atualizar observação.');
+                });
+        }
+
+        // Funções para Troca de Óleo
+        function enableEditOilChange(itemId) {
+            document.getElementById(`edit-container-oilchange-${itemId}`).classList.remove('d-none');
+        }
+
+        function disableEditOilChange(itemId) {
+            document.getElementById(`edit-container-oilchange-${itemId}`).classList.add('d-none');
+        }
+
+        function saveObservationOilChange(itemId) {
+            const textarea = document.getElementById(`textarea-oilchange-${itemId}`);
+            const observation = textarea.value;
+
+            fetch(`/troca-de-oleo/${itemId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        observation: observation
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Observação atualizada!');
+                        document.getElementById(`observation-oilchange-${itemId}`).textContent = observation ||
+                            'Sem observações.';
+                        disableEditOilChange(itemId);
+                    } else {
+                        alert('Erro ao atualizar observação.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao atualizar observação:', error);
+                    alert('Erro ao atualizar observação.');
+                });
+        }
+
 
         function fetchFineData(page = 1) {
             const apiUrl =

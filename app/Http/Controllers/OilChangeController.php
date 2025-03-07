@@ -65,6 +65,20 @@ class OilChangeController extends Controller
         return redirect()->back()->with('success', 'Adicionado com sucesso!');
     }
 
+    public function updateObservation(Request $request, $id)
+    {
+        $request->validate([
+            'observation' => 'nullable|string|max:500'
+        ]);
+
+        $oilChange = OilChange::findOrFail($id);
+        $oilChange->observation = $request->observation;
+        $oilChange->save();
+
+        return response()->json(['success' => true, 'message' => 'Observação atualizada com sucesso!']);
+    }
+
+
     /**
      * Remove the specified resource from storage.
      */
@@ -85,10 +99,10 @@ class OilChangeController extends Controller
             'date' => 'required|date',
             'cost' => 'required|numeric|min:0|max:999999',
             'actual_km' => ['required', 'integer', function ($attribute, $value, $fail) use ($vehicle) {
-            if ($value < $vehicle->actual_km) {
-                $fail("O valor de 'actual_km' deve ser maior ou igual a {$vehicle->actual_km}.");
-            }
-        }],
+                if ($value < $vehicle->actual_km) {
+                    $fail("O valor de 'actual_km' deve ser maior ou igual a {$vehicle->actual_km}.");
+                }
+            }],
             'observation' => 'nullable|string'
         ]);
 

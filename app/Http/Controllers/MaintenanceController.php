@@ -83,6 +83,19 @@ class MaintenanceController extends Controller
         }
     }
 
+    public function updateObservation(Request $request, $id)
+    {
+        $request->validate([
+            'observation' => 'nullable|string|max:500'
+        ]);
+
+        $maintenance = Maintenance::findOrFail($id);
+        $maintenance->observation = $request->observation;
+        $maintenance->save();
+
+        return response()->json(['success' => true, 'message' => 'Observação atualizada com sucesso!']);
+    }
+
     /**
      * Remove the specified resource from storage.
      */
