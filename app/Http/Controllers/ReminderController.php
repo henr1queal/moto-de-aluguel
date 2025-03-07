@@ -115,7 +115,7 @@ class ReminderController extends Controller
         }
 
         // Notificação especial de quinta-feira
-        $isThursday = Carbon::today()->isMonday();
+        $isThursday = Carbon::today()->isThursday();
 
         // Retornar as notificações
         $totalNotifications = $paymentsToday + $paymentsOneDay + $paymentsTwoDays + $overduePayments + $oilChangesCount + $revisionsCount;
@@ -130,6 +130,6 @@ class ReminderController extends Controller
     private function getUpcomingThursday()
     {
         $today = Carbon::today();
-        return $today->isMonday() ? true : false;
+        return $today->isThursday() ? true : false;
     }
 }

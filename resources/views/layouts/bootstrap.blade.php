@@ -31,9 +31,9 @@
         .menu-button {
             margin-top: 10px;
         }
-        
+
         /* .menu-button a {
-            max-height: 44.3px;            
+            max-height: 44.3px;
         } */
 
         .menu {
@@ -127,33 +127,30 @@
                     let total = data.total;
                     let quintaFeira = data.quinta_feira;
 
-                    // Se quintaFeiraLida for "false", adiciona +1 ao total
-                    if (quintaFeiraLida === "false") {
+                    // Converte valores string para boolean corretamente
+                    let quintaFeiraLidaBool = quintaFeiraLida === "true";
+
+                    // Se quinta-feira estiver ativa e ainda não foi lida, adiciona +1
+                    if (quintaFeira && !quintaFeiraLidaBool) {
                         total++;
+                        localStorage.setItem("quinta_feira_lida", "false");
                     }
 
-                    // Gerencia o estado da notificação de quinta-feira
+                    // Se quinta-feira não existir mais, remove do localStorage
                     if (!quintaFeira) {
-                        if (quintaFeiraLida) {
-                            localStorage.setItem("quinta_feira_lida", null);
-                        }
-                    } else {
-                        if (quintaFeiraLida === "null") {
-                            localStorage.setItem("quinta_feira_lida", "false");
-                            total++;
-                        }
+                        localStorage.removeItem("quinta_feira_lida");
                     }
 
-                    // Se a nova contagem for maior, atualiza. Caso contrário, mantém a antiga
-
-                    // Salva a contagem no localStorage
+                    // Atualiza o localStorage
                     localStorage.setItem("total_notifications", total);
-                    localStorage.setItem("quinta_feira", quintaFeira);
+                    localStorage.setItem("quinta_feira", JSON.stringify(quintaFeira));
+
                     // Atualiza o badge de notificações
                     atualizarBadgeNotificacoes();
                 } catch (error) {
                     console.error("Erro ao buscar notificações:", error);
                 }
+
             }, 1000);
         });
 
