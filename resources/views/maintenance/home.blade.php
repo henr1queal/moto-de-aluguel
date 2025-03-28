@@ -63,6 +63,10 @@
             color: #FFFFFF !important;
         }
 
+        #searchPart::placeholder {
+            color: gray !important;
+        }
+
         #maintenance-modal {
             min-height: 50dvh;
         }
@@ -150,11 +154,18 @@
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-0">
-                    <div class="row g-0 p-3 text-end">
+                    <div class="row g-0 p-3 text-end align-items-center">
+                        <div class="col text-center">
+                            <input type="text" id="searchPart"
+                                class="form-control form-control-sm bg-transparent text-white" placeholder="Buscar peça..."
+                                oninput="debouncedSearchParts()" />
+                        </div>
                         <div class="col">
-                            <button class="btn btn-primary border-1 border-white" onclick="fetchPartsList()"
+                            <button class="btn btn-primary btn-sm border-1 border-white" onclick="fetchPartsList()"
                                 data-bs-toggle="modal" data-bs-target="#newMaintenanceModal">Nova manutenção</button>
                         </div>
+                    </div>
+                    <div class="row justify-content-center g-0 mt-2 mb-3">
                     </div>
                     <h5 class="text-center">HISTÓRICO</h5>
                     <div class="row text-center g-0 p-4">
@@ -180,25 +191,24 @@
                 <form action="{{ route('maintenance.store') }}" method="POST" class="modal-body">
                     @csrf
                     <input type="hidden" name="vehicle_id" id="vehicle_id">
-                    <div class="row">
-                        <div class="col-auto text-start">
-                            <label for="type" class="form-label fw-light">KM Atual<span
-                                    class="text-danger"><strong>*</strong></span></label>
-                            <input type="number" class="form-control bg-transparent" id="actual_km" required
-                                value="" name="actual_km" min="1" max="999999">
-                        </div>
-                        <div class="col-auto text-start">
-                            <label for="date" class="form-label fw-light">Data da troca<span
-                                    class="text-danger"><strong>*</strong></span></label>
-                            <input type="date" class="form-control bg-transparent" id="date" required
-                                value="{{ date('Y-m-d') }}" name="date" min="1" max="999999">
-                        </div>
-                    </div>
-                    <div class="row mt-4">
-                        <div class="col text-start">
-                            <h6>Adicionar itens</h6>
-                        </div>
+                    <div class="row mt-1">
                         <div class="col-12">
+                            <div class="row">
+                                <div class="col-12 text-start">
+                                    <h6>Detalhes</h6>
+                                </div>
+                                <div class="col-auto text-start">
+                                    <label for="date" class="form-label fw-light">Data da troca<span
+                                            class="text-danger"><strong>*</strong></span></label>
+                                    <input type="date" class="form-control bg-transparent" id="date" required
+                                        value="{{ date('Y-m-d') }}" name="date" min="1" max="999999">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col text-start mt-4">
+                            <h6>Adicionar itens<span class="text-danger"><strong>*</strong></span></h6>
+                        </div>
+                        <div class="col-12 mb-4">
                             <select class="form-control bg-transparent text-black" id="parts" multiple>
                             </select>
                         </div>
@@ -217,6 +227,17 @@
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script>
         let choices;
+        let debounceTimer;
+
+        function debouncedSearchParts() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const vehicleId = document.getElementById('vehicle_id').value;
+                const search = document.getElementById('searchPart').value;
+                fetchPartsChanged(vehicleId, 1, search);
+            }, 1000); // Espera 400ms após digitação
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             @if (session('success'))
                 localStorage.removeItem('listAllParts');
@@ -243,7 +264,6 @@
                     const pecasModal = document.getElementById('pecasModal');
                     const actualKmField = document.getElementById('actual_km');
                     pecasModal.innerHTML = `${vehicleplate} - ${vehicleStatus}`;
-                    actualKmField.setAttribute('value', actualKm)
                     // Abre o modal com loading
                     pecasModalBody.innerHTML = `
                     <div class="text-center py-5">
@@ -318,23 +338,24 @@
                 if (container.querySelector(`[data-value="${value}"]`)) return;
 
                 const block = document.createElement('div');
-                block.classList.add('row', 'mt-4', 'pt-4');
+                block.classList.add('row', 'mt-2');
                 block.dataset.value = value;
 
                 block.innerHTML = `
       <div class="col-12 mb-2">
-        <p class="text-white">${label}</p>
+        <p class="text-white mb-0">${label}</p>
       </div>
       <div class="col-auto text-start">
         <label class="form-label fw-light">Tipo<span class="text-danger"><strong>*</strong></span></label>
         <select name="items[${value}][type]" class="form-select bg-transparent" required>
           <option class="text-black" value="UN.">UN.</option>
+          <option class="text-black" value="ML.">ML.</option>
           <option class="text-black" value="LT.">LT.</option>
         </select>
       </div>
       <div class="col-auto text-start">
         <label class="form-label fw-light">Quantidade<span class="text-danger"><strong>*</strong></span></label>
-        <input type="number" class="form-control bg-transparent" name="items[${value}][quantity]" required min="1" max="999999">
+        <input type="number" class="form-control bg-transparent" name="items[${value}][quantity]" required min="1" max="999999" value="1">
       </div>
       <div class="col text-start">
         <label class="form-label fw-light">Valor<span class="text-danger"><strong>*</strong></span></label>
@@ -383,9 +404,8 @@
             return `${day}/${month}/${year}`;
         }
 
-        function fetchPartsChanged(vehicleId, page = 1) {
-            const apiUrl = `/manutencoes/veiculo/${vehicleId}?page=${page}`;
-
+        function fetchPartsChanged(vehicleId, page = 1, search = '') {
+            const apiUrl = `/manutencoes/veiculo/${vehicleId}?page=${page}&search=${encodeURIComponent(search)}`;
             fetch(apiUrl)
                 .then(response => {
                     if (!response.ok) {
@@ -399,7 +419,7 @@
                     if (data.total === 0) {
                         resultsContainer.innerHTML = `
                     <div class="text-center p-4">
-                        <p class="text-secondary">Nenhuma peça foi substituída.</p>
+                        <p class="text-secondary">Nenhuma peça foi encontrada.</p>
                     </div>
                 `;
                         return;
@@ -408,6 +428,7 @@
                     let html = '';
 
                     data.data.forEach((item, index) => {
+                        console.log(item)
                         const collapseId = `peca-collapse-${index}`;
 
                         html += `
@@ -415,7 +436,7 @@
                         <div class="col-12 d-flex justify-content-between align-items-center" 
                             data-bs-toggle="collapse" data-bs-target="#${collapseId}" 
                             aria-expanded="false" aria-controls="${collapseId}">
-                            <span>${index + 1}. ${item.part_name}</span>
+                            <span>${item.part_name}</span>
                             <span class="badge rounded-3 fs-6" style="border: 1px solid white;">
                                 ${formattedDate(item.maintenance_date)}
                             </span>
@@ -428,36 +449,41 @@
                             <div class="row">
                                 <div class="col">
                                     <div class="row">
-                                        <div class="col-auto text-start">
-                                            <label for="type" class="form-label fw-light">Tipo<span class="text-danger"><strong>*</strong></span></label>
-                                            <select name="type" class="form-select bg-transparent" aria-label="Tipo">
-                                                <option class="text-black" value="UN." selected="${item.type === 'UN.' ? 'true' : 'false'}">UN.</option>
-                                                <option class="text-black" value="LT." selected="${item.type === 'LT.' ? 'true' : 'false'}">LT.</option>
-                                                </select>   
+                                        <div class="col-12 text-start mb-3">
+                                            <div class="row">
+                                                <div class="col-6 text-start">
+                                                    <label for="autonomy" class="form-label fw-light">Autonomia</label>
+                                                    <input type="text" class="form-control bg-transparent" id="autonomy" required value="${item.final_km ? item.final_km - item.initial_km : item.vehicle_actual_km - item.initial_km} KM" name="quantity" min="1" max="999999" disabled>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <label for="changed_with" class="form-label fw-light">Trocado com</label>
+                                                    <input type="text" class="form-control bg-transparent" id="changed_with" required value="${item.initial_km} KM" name="changed_with" min="1" max="999999" disabled>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="col-auto text-start">
-                                            <label for="quantity" class="form-label fw-light">Quantidade<span class="text-danger"><strong>*</strong></span></label>
-                                            <input type="number" class="form-control bg-transparent" id="quantity" required value="${item.quantity}" name="quantity" min="1" max="999999">
+                                        <div class="col-6 text-start">
+                                            <label for="quantity" class="form-label fw-light">Quantidade</label>
+                                            <input type="text" class="form-control bg-transparent" id="quantity" required value="${item.quantity} ${item.type}" name="quantity" min="1" max="999999" disabled>
                                         </div>
-                                        <div class="col text-start">
+                                        <div class="col-6 text-start">
                                             <label for="cost" class="form-label fw-light">Valor<span class="text-danger"><strong>*</strong></span></label>
                                             <input type="number" class="form-control bg-transparent" id="cost" value="${item.cost}" required name="cost" max="999999">
                                         </div>
                                         <div class="col-12 text-start mt-3">
                                             <div>
                                                 <label for="observation" class="form-label fw-light">Observação<span class="text-danger"><strong>*</strong></span></label>
-                                                <textarea class="form-control bg-transparent text-white" name="observation" rows="3">${item.observation}</textarea>
+                                                <textarea class="form-control bg-transparent text-white" name="observation" rows="3">${item.observation === null ? '' : item.observation}</textarea>
                                             </div>
                                         </div>
-                                        <div class="col text-start mt-3">
-                                            <button class="btn btn-danger border-white border-1 btn-delete" 
+                                        <div class="col-12 mt-3">
+                                            <div class="d-flex justify-content-between">
+                                                <button class="btn btn-danger border-white border-1 btn-delete" 
                                                 data-maintenance-id="${item.maintenance_id}" 
                                                 data-part-id="${item.part_id}">Deletar</button>
-                                        </div>
-                                        <div class="col text-end align-self-end">
-                                            <button class="btn btn-success w-75 border-white border-1 btn-update" 
+                                                <button class="btn btn-success border-white border-1 btn-update" 
                                                 data-maintenance-id="${item.maintenance_id}" 
                                                 data-part-id="${item.part_id}">Atualizar</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -473,14 +499,14 @@
                     <button 
                         class="btn btn-sm btn-secondary" 
                         ${data.current_page > 1 ? '' : 'disabled'} 
-                        onclick="fetchPartsChanged(${vehicleId}, ${data.current_page - 1})">
+                        onclick="fetchPartsChanged('${vehicleId}', ${data.current_page - 1})">
                         Anterior
                     </button>
                     <span>Página ${data.current_page} de ${data.last_page}</span>
                     <button 
                         class="btn btn-sm btn-secondary" 
                         ${data.current_page < data.last_page ? '' : 'disabled'} 
-                        onclick="fetchPartsChanged(${vehicleId}, ${data.current_page + 1})">
+                        onclick="fetchPartsChanged('${vehicleId}', ${data.current_page + 1})">
                         Próxima
                     </button>
                 </div>

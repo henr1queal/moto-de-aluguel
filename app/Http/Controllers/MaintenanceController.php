@@ -42,25 +42,33 @@ class MaintenanceController extends Controller
         return response()->json($parts);
     }
 
-    public function getPartsChanged($vehicleId)
+    public function getPartsChanged(Request $request, $vehicleId)
     {
+        $search = $request->input('search', '');
+
         $maintenances = DB::table('maintenance_part')
             ->join('maintenances', 'maintenance_part.maintenance_id', '=', 'maintenances.id')
             ->join('vehicles', 'maintenances.vehicle_id', '=', 'vehicles.id')
             ->join('parts', 'maintenance_part.part_id', '=', 'parts.id')
             ->select(
+                'vehicles.actual_km as vehicle_actual_km',
                 'maintenances.date as maintenance_date',
                 'maintenances.id as maintenance_id',
                 'parts.id as part_id',
                 'parts.name as part_name',
-                'maintenance_part.observation',
+                'maintenance_part.initial_km',
+                'maintenance_part.final_km',
+                'maintenance_part.changed_in',
                 'maintenance_part.observation',
                 'maintenance_part.type',
                 'maintenance_part.quantity',
                 'maintenance_part.cost',
             )
-            ->orderBy('maintenances.date', 'asc')
             ->where('vehicles.id', '=', $vehicleId)
+            ->when($search, function ($query, $search) {
+                $query->where('parts.name', 'like', '%' . $search . '%');
+            })
+            ->orderBy('maintenances.created_at', 'desc')
             ->paginate(10);
 
         return response()->json($maintenances);
@@ -68,25 +76,32 @@ class MaintenanceController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'vehicle_id' => 'required|exists:vehicles,id',
-            'date'       => 'required|date',
-            'items'      => 'required|array',
-            'items.*.type' => 'required|string',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.cost' => 'required|numeric|min:0',
-            'items.*.observation' => 'nullable|string',
-        ]);
-
-        DB::beginTransaction();
 
         try {
+            $request->validate([
+                'date' => 'required|date',
+                'vehicle_id' => 'required|exists:vehicles,id',
+                'items'      => 'required|array',
+                'items.*.type' => 'required|string|in:UN.,ML.,LT.',
+                'items.*.quantity' => 'required|integer|min:1',
+                'items.*.cost' => 'required|numeric|min:0',
+                'items.*.observation' => 'nullable|string',
+            ]);
+
+            DB::beginTransaction();
+
             $maintenance = Maintenance::create([
                 'vehicle_id' => $request->vehicle_id,
                 'date' => $request->date,
             ]);
 
+            $vehicleActualKm = Vehicle::select('id', 'actual_km')->find($request->vehicle_id);
+            $vehicleActualKm = $vehicleActualKm->actual_km;
+
+            $changedParts = [];
+
             foreach ($request->items as $key => $item) {
+                $item['initial_km'] = $vehicleActualKm;
                 // Se a chave for numérica, é uma peça existente
                 if (is_numeric($key)) {
                     $partId = (int) $key;
@@ -100,13 +115,34 @@ class MaintenanceController extends Controller
                     $partId = $newPart->id;
                 }
 
+                $changedParts[] = $partId;
+
                 // Relacionar no pivot com os dados extras
                 $maintenance->parts()->attach($partId, [
                     'type' => $item['type'],
+                    'initial_km' => $item['initial_km'],
                     'quantity' => $item['quantity'],
                     'cost' => $item['cost'],
                     'observation' => $item['observation'] ?? null,
+                    'created_at' => now(),
                 ]);
+            }
+
+            $maintenances = Maintenance::where('vehicle_id', $request->vehicle_id)
+                ->whereHas('parts', function ($query) use ($changedParts) {
+                    $query->whereIn('parts.id', $changedParts);
+                })->whereNot('id', $maintenance->id)
+                ->pluck('id');
+
+            if ($maintenances->isNotEmpty()) {
+                DB::table('maintenance_part')
+                    ->whereIn('maintenance_id', $maintenances)
+                    ->whereIn('part_id', $changedParts)
+                    ->whereNull('changed_in')
+                    ->update([
+                        'changed_in' => now(),
+                        'final_km' => $vehicleActualKm,
+                    ]);
             }
 
             DB::commit();
@@ -121,8 +157,6 @@ class MaintenanceController extends Controller
     public function updatePart(Request $request, Maintenance $maintenance, Part $part)
     {
         $data = $request->validate([
-            'type' => 'required|string',
-            'quantity' => 'required|integer|min:1',
             'cost' => 'required|numeric|min:0',
             'observation' => 'nullable|string',
         ]);
@@ -136,13 +170,11 @@ class MaintenanceController extends Controller
     {
         $maintenance->parts()->detach($part->id);
 
-        // Se não restar nenhuma peça vinculada, deletar a manutenção
         if ($maintenance->parts()->count() === 0) {
             $maintenance->delete();
-            return response()->json(['message' => 'Peça desvinculada. Manutenção excluída por não conter mais itens.']);
         }
 
-        return response()->json(['message' => 'Peça desvinculada com sucesso.']);
+        return response()->json(['message' => 'Item de manutenção deletado.']);
     }
 
 
