@@ -8,6 +8,7 @@ use App\Models\Vehicle;
 use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -22,52 +23,52 @@ class RentalController extends Controller
     {
         $search = $request->input('search', '');
         $filter = $request->input('filter', 'ativos'); // Filtro padrão 'ativos'
+        $userId = auth()->id(); // ID do usuário autenticado
 
-        // Obtém os aluguéis do usuário autenticado e adiciona o join corretamente
-        $query = Auth()->user()->rentals()
-            ->join('vehicles as v', 'rentals.vehicle_id', '=', 'v.id') // Evita conflito de alias
-            ->select('rentals.*');
+        // Cria uma chave única para o cache com base no filtro, pesquisa e usuário
+        $cacheKey = "myRentals_{$filter}";
 
-        // Aplica o filtro baseado na opção selecionada
-        switch ($filter) {
-            case 'ativos':
-                $query->whereNull('finished_at'); // Apenas ativos (não finalizados)
-                break;
+        // Cache de 7 dias
+        $myRentals = Cache::remember($cacheKey, 60 * 24 * 7, function () use ($search, $filter) {
+            // Obtém os aluguéis do usuário autenticado e adiciona o join corretamente
+            $query = Auth()->user()->rentals()
+                ->join('vehicles as v', 'rentals.vehicle_id', '=', 'v.id')
+                ->select('rentals.*');
 
-            case 'cancelados':
-                $query->whereNotNull('stop_date'); // Apenas cancelados (parados manualmente)
-                break;
-
-            case 'finalizados':
-                $query->whereNotNull('finished_at')->whereNull('stop_date'); // Finalizados corretamente
-                break;
-        }
-
-        // Aplica a pesquisa se houver um termo fornecido
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('rentals.landlord_name', 'like', '%' . $search . '%')
-                    ->orWhere('v.license_plate', 'like', '%' . $search . '%'); // Usando o alias 'v'
-            });
-        }
-
-        // Ordenação e paginação
-        $myRentals = $query
-            ->orderByRaw('finished_at IS NULL DESC')
-            ->orderBy('finished_at', 'desc')
-            ->paginate(10);
-
-        // Adiciona flag de pagamentos atrasados para os ativos
-        foreach ($myRentals as $rental) {
-            if ($rental->finished_at === null) {
-                $rental->has_overdue_payments = $rental->hasOverduePayments();
+            switch ($filter) {
+                case 'ativos':
+                    $query->whereNull('finished_at');
+                    break;
+                case 'cancelados':
+                    $query->whereNotNull('stop_date');
+                    break;
+                case 'finalizados':
+                    $query->whereNotNull('finished_at')->whereNull('stop_date');
+                    break;
             }
-        }
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('rentals.landlord_name', 'like', '%' . $search . '%')
+                        ->orWhere('v.license_plate', 'like', '%' . $search . '%');
+                });
+            }
+
+            $rentals = $query->orderByRaw('finished_at IS NULL DESC')
+                ->orderBy('finished_at', 'desc')
+                ->paginate(10);
+
+            foreach ($rentals as $rental) {
+                if ($rental->finished_at === null) {
+                    $rental->has_overdue_payments = $rental->hasOverduePayments();
+                }
+            }
+
+            return $rentals;
+        });
 
         return view('rental.index', compact('myRentals', 'search', 'filter'));
     }
-
-
 
     /**
      * Show the form for creating a new resource.
@@ -97,6 +98,10 @@ class RentalController extends Controller
             $this->createPayments($rental->id, $validated['start_date'], $validated['end_date'], $validated['cost'], $validated['payment_day']);
 
             DB::commit();
+
+            Cache::forget("myRentals_ativos");
+            Cache::forget("myRentals_cancelados");
+            Cache::forget("myRentals_finalizados");
 
             return redirect()->route('rental.index')->with('success', 'Locação adicionada com sucesso!');
         } catch (ValidationException $e) {
@@ -137,7 +142,7 @@ class RentalController extends Controller
             'Friday' => 'Sexta-feira',
             'Saturday' => 'Sábado'
         ];
-        $rental->load(['vehicle.latestMaintenance', 'vehicle.latestOilChange']);
+        $rental->load(['vehicle.latestRevision', 'vehicle.latestOilChange']);
         $rental->payment_day = $days[$rental->payment_day];
 
         $previousRental = Rental::where('created_at', '<', $rental->created_at)
@@ -187,6 +192,10 @@ class RentalController extends Controller
             if ($rental->isDirty()) {
                 $rental->save();
             }
+
+            Cache::forget("myRentals_ativos");
+            Cache::forget("myRentals_cancelados");
+            Cache::forget("myRentals_finalizados");
 
             DB::commit();
 
@@ -445,9 +454,11 @@ class RentalController extends Controller
         ]);
 
         $validated['finished_at'] = $validated['stop_date'];
-        if ($rental->payments()->where('paid', 0)->count() === 0) {
+        if ($rental->payments()->where('paid', 0)->exists()) {
+            $rental->payments()->where('paid', 0)->update(['paid' => 3]);
+        } else {
             $validated['stop_date'] = null;
-        };
+        }
 
         // Atualiza os dados do aluguel
         $rental->update($validated);

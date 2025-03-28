@@ -3,125 +3,194 @@
 namespace App\Http\Controllers;
 
 use App\Models\Maintenance;
+use App\Models\Part;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class MaintenanceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(string $vehicle, string $rental = null)
+    public function index()
     {
-        $maintenances = Maintenance::where('vehicle_id', $vehicle);
-        if ($rental) {
-            $maintenances = $maintenances->where('rental_id', $rental);
-        }
-        $maintenances = $maintenances->orderByDesc('created_at')->paginate(10);
-
-        $maintenances->getCollection()->transform(function ($item, $index) use ($maintenances) {
-            $item->count = $maintenances->total() - (($maintenances->currentPage() - 1) * $maintenances->perPage() + $index);
-            return $item;
+        $authUserId = Auth()->user()->id;
+        $key = "myVehicles";
+        $myVehicles = Cache::remember($key, 60 * 24 * 7, function () {
+            return Vehicle::select([
+                'id',
+                'brand',
+                'model',
+                'year',
+                'license_plate',
+                'actual_km'
+            ])->with('maintenances')->get();
         });
 
-        return response()->json($maintenances, 200);
+        return view('maintenance.home', compact('myVehicles'));
+        return response()->json($manutencoes);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function show($id)
     {
-        //
+        $maintenance = Maintenance::with(['vehicle', 'parts'])->findOrFail($id);
+        return response()->json($maintenance);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request, Vehicle $vehicle)
+    public function getAllParts()
     {
+        $parts = Part::select('id', 'name')->get();
+        return response()->json($parts);
+    }
+
+    public function getPartsChanged($vehicleId)
+    {
+        $maintenances = DB::table('maintenance_part')
+            ->join('maintenances', 'maintenance_part.maintenance_id', '=', 'maintenances.id')
+            ->join('vehicles', 'maintenances.vehicle_id', '=', 'vehicles.id')
+            ->join('parts', 'maintenance_part.part_id', '=', 'parts.id')
+            ->select(
+                'maintenances.date as maintenance_date',
+                'maintenances.id as maintenance_id',
+                'parts.id as part_id',
+                'parts.name as part_name',
+                'maintenance_part.observation',
+                'maintenance_part.observation',
+                'maintenance_part.type',
+                'maintenance_part.quantity',
+                'maintenance_part.cost',
+            )
+            ->orderBy('maintenances.date', 'asc')
+            ->where('vehicles.id', '=', $vehicleId)
+            ->paginate(10);
+
+        return response()->json($maintenances);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'vehicle_id' => 'required|exists:vehicles,id',
+            'date'       => 'required|date',
+            'items'      => 'required|array',
+            'items.*.type' => 'required|string',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.cost' => 'required|numeric|min:0',
+            'items.*.observation' => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+
         try {
-            $validated = $this->validateStoreData($request, $vehicle);
+            $maintenance = Maintenance::create([
+                'vehicle_id' => $request->vehicle_id,
+                'date' => $request->date,
+            ]);
 
-            $validated['vehicle_id'] = $vehicle->id;
+            foreach ($request->items as $key => $item) {
+                // Se a chave for numérica, é uma peça existente
+                if (is_numeric($key)) {
+                    $partId = (int) $key;
+                } else {
+                    // Criar nova peça
+                    $newPart = Part::firstOrCreate([
+                        'name' => $key,
+                    ], [
+                        'name' => $key
+                    ]);
+                    $partId = $newPart->id;
+                }
 
-            if ($vehicle->user_id !== auth()->id()) {
-                return redirect()->back()->with('error', 'Selecione um veículo existente.');
+                // Relacionar no pivot com os dados extras
+                $maintenance->parts()->attach($partId, [
+                    'type' => $item['type'],
+                    'quantity' => $item['quantity'],
+                    'cost' => $item['cost'],
+                    'observation' => $item['observation'] ?? null,
+                ]);
             }
 
-            $actualRental = $vehicle->actualRental()->select('id', 'vehicle_id', 'finished_at')->first();
-            if ($actualRental) {
-                $validated['rental_id'] = $actualRental->id;
-            }
+            DB::commit();
 
-            // Criar a manutenção
-            Maintenance::create($validated);
-
-            // Atualizar dados do veículo
-            if ($validated['actual_km'] >= $vehicle->actual_km) {
-                $vehicle->actual_km = $validated['actual_km'];
-            }
-            $vehicle->next_revision = $validated['actual_km'] + $vehicle->revision_period;
-
-            if ($validated['have_oil_change']) {
-                $vehicle->next_oil_change = $validated['actual_km'] + $vehicle->oil_period;
-            }
-
-            $vehicle->save();
-
-            return redirect()->back()->with('success', 'Sucesso! O veículo foi atualizado.');
-        } catch (ValidationException $e) {
-            return redirect()->back()
-                ->withErrors($e->errors()) // Retorna os erros para a sessão
-                ->withInput() // Mantém os inputs preenchidos
-                ->with('error', 'Erro adicionar manutenção.');
-        } catch (\Throwable $th) {
-            return redirect()->back()
-                ->with('error', 'Erro interno no servidor. Tente novamente mais tarde.');
+            return redirect()->back()->with('success', 'Manutenção salva com sucesso!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Erro ao salvar manutenção', 'details' => $e->getMessage()], 500);
         }
     }
 
-    public function updateObservation(Request $request, $id)
+    public function updatePart(Request $request, Maintenance $maintenance, Part $part)
     {
-        $request->validate([
-            'observation' => 'nullable|string|max:500'
+        $data = $request->validate([
+            'type' => 'required|string',
+            'quantity' => 'required|integer|min:1',
+            'cost' => 'required|numeric|min:0',
+            'observation' => 'nullable|string',
         ]);
 
+        $maintenance->parts()->updateExistingPivot($part->id, $data);
+
+        return response()->json(['message' => 'Peça atualizada com sucesso.']);
+    }
+
+    public function detachPart(Maintenance $maintenance, Part $part)
+    {
+        $maintenance->parts()->detach($part->id);
+
+        // Se não restar nenhuma peça vinculada, deletar a manutenção
+        if ($maintenance->parts()->count() === 0) {
+            $maintenance->delete();
+            return response()->json(['message' => 'Peça desvinculada. Manutenção excluída por não conter mais itens.']);
+        }
+
+        return response()->json(['message' => 'Peça desvinculada com sucesso.']);
+    }
+
+
+    public function update(Request $request, $id)
+    {
         $maintenance = Maintenance::findOrFail($id);
-        $maintenance->observation = $request->observation;
-        $maintenance->save();
 
-        return response()->json(['success' => true, 'message' => 'Observação atualizada com sucesso!']);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($Maintenance)
-    {
-        $Maintenance = Maintenance::where('id', $Maintenance)->whereHas('vehicle', function ($query) {
-            $query;
-        })->delete();
-        if ($Maintenance) {
-            return redirect()->back()->with('success', 'Manutenção deletada.');
-        };
-        return redirect()->back()->with('error', 'Selecione uma manutenção existente.');
-    }
-
-    protected function validateStoreData(Request $request, Vehicle $vehicle)
-    {
-        return $request->validate([
-            'date' => 'required|date',
-            'cost' => 'required|numeric|min:0|max:999999',
-            'actual_km' => ['required', 'integer', function ($attribute, $value, $fail) use ($vehicle) {
-                if ($value < $vehicle->actual_km) {
-                    $fail("O valor de 'actual_km' deve ser maior ou igual a {$vehicle->actual_km}.");
-                }
-            }],
-            'have_oil_change' => 'required|boolean',
-            'observation' => 'nullable|string'
+        $data = $request->validate([
+            'vehicle_id' => 'sometimes|exists:vehicles,id',
+            'date'       => 'sometimes|date',
+            'parts'      => 'array',
+            'parts.*.id' => 'required_with:parts|exists:parts,id',
+            'parts.*.action' => 'required_with:parts|in:add,update,delete',
+            'parts.*.observation' => 'nullable|string',
         ]);
+
+        $maintenance->update($data);
+
+        if (!empty($data['parts'])) {
+            foreach ($data['parts'] as $part) {
+                switch ($part['action']) {
+                    case 'add':
+                        $maintenance->parts()->attach($part['id'], [
+                            'observation' => $part['observation'] ?? null
+                        ]);
+                        break;
+
+                    case 'update':
+                        $maintenance->parts()->updateExistingPivot($part['id'], [
+                            'observation' => $part['observation'] ?? null
+                        ]);
+                        break;
+
+                    case 'delete':
+                        $maintenance->parts()->detach($part['id']);
+                        break;
+                }
+            }
+        }
+
+        return response()->json($maintenance->load(['vehicle', 'parts']));
+    }
+
+    public function destroy($id)
+    {
+        $maintenance = Maintenance::findOrFail($id);
+        $maintenance->delete();
+
+        return response()->json(['message' => 'Manutenção deletada com sucesso!']);
     }
 }

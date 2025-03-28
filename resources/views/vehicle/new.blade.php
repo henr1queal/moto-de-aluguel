@@ -63,7 +63,7 @@
                             @error('renavam')
                                 <input type="text" class="form-control bg-transparent border-danger" id="renavam"
                                     value="{{ old('renavam') }}" name="renavam" required>
-                                <small class="very-small text-danger">Apenas números.</small>
+                                <small class="very-small text-danger">Apenas 11 números.</small>
                             @else
                                 <input type="text" class="form-control bg-transparent" id="renavam"
                                     value="{{ old('renavam') }}" name="renavam" required>

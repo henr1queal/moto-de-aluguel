@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -56,9 +57,9 @@ class Vehicle extends Model
         return $this->hasMany(Rental::class);
     }
 
-    public function maintenances(): HasMany
+    public function revisions(): HasMany
     {
-        return $this->hasMany(Maintenance::class);
+        return $this->hasMany(Revision::class);
     }
 
     public function oilChanges(): HasMany
@@ -81,11 +82,11 @@ class Vehicle extends Model
         return $this->hasOne(Rental::class)->whereNull('finished_at')->latest();
     }
 
-    public function latestMaintenance(): HasOne
+    public function latestRevision(): HasOne
     {
-        return $this->hasOne(Maintenance::class)->orderByDesc('date')->latest();
+        return $this->hasOne(Revision::class)->orderByDesc('date')->latest();
     }
-    
+
     public function latestMileage(): HasOne
     {
         return $this->hasOne(MileageHistory::class)->orderByDesc('date')->latest();
@@ -94,6 +95,16 @@ class Vehicle extends Model
     public function latestOilChange(): HasOne
     {
         return $this->hasOne(OilChange::class)->orderByDesc('date')->latest();
+    }
+
+    public function maintenances()
+    {
+        return $this->hasMany(Maintenance::class);
+    }
+
+    public function parts(): HasManyThrough
+    {
+        return $this->hasManyThrough(Part::class, Maintenance::class)->orderByDesc('date');
     }
 
     public function setLicensePlateAttribute($value)

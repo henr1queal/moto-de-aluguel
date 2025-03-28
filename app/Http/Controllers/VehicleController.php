@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 
 class VehicleController extends Controller
@@ -14,13 +15,16 @@ class VehicleController extends Controller
     public function index()
     {
         $authUserId = Auth()->user()->id;
-        $myVehicles = Vehicle::select([
-            'id',
-            'brand',
-            'model',
-            'year',
-            'license_plate'
-        ])->get();
+        $key = "myVehicles";
+        $myVehicles = Cache::remember($key, 60 * 24 * 7, function () {
+            return Vehicle::select([
+                'id',
+                'brand',
+                'model',
+                'year',
+                'license_plate'
+            ])->get();
+        });
         return view('vehicle.home', compact('myVehicles'));
     }
 
@@ -50,7 +54,7 @@ class VehicleController extends Controller
             'renavam' => [
                 'required',
                 'string',
-                'max:15',
+                'max:11',
                 Rule::unique('vehicles', 'renavam')->whereNull('deleted_at')
             ],
             'actual_km' => 'required|integer|min:0',
@@ -87,14 +91,16 @@ class VehicleController extends Controller
         // Se não existir, cria um novo veículo
         $vehicle = Vehicle::create($validated);
 
+        Cache::forget("myVehicles");
+
         return redirect()
             ->route('vehicle.show', ['vehicle' => $vehicle->id])
             ->with('success', 'Veículo criado com sucesso!');
     }
 
     /**
-    * Display the specified resource.
-    */
+     * Display the specified resource.
+     */
     public function show(Vehicle $vehicle)
     {
         $vehicle->load('actualRental');
@@ -111,8 +117,8 @@ class VehicleController extends Controller
     }
 
     /**
-    * Show the form for editing the specified resource.
-    */
+     * Show the form for editing the specified resource.
+     */
     public function edit(Vehicle $vehicle)
     {
         //
@@ -143,6 +149,8 @@ class VehicleController extends Controller
 
             // Exclui os campos brand e model para garantir que não sejam atualizados
             unset($validated['brand'], $validated['model']);
+
+            Cache::forget("myVehicles");
 
             $vehicle->update($validated);
 

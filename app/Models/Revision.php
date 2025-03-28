@@ -7,18 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
-class OilChange extends Model
+class Revision extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'cost',
-        'actual_km',
         'date',
+        'actual_km',
         'observation',
         'vehicle_id',
-        'rental_id',
-        'revision_id'
+        'have_oil_change',
+        'rental_id'
     ];
 
     protected $keyType = 'string'; // Indica que a chave primária é uma string.
@@ -34,16 +34,6 @@ class OilChange extends Model
                 $model->id = Str::uuid();
             }
         });
-    }
-
-    public function maintenance()
-    {
-        return $this->belongsTo(Maintenance::class);
-    }
-
-    public function rental()
-    {
-        return $this->belongsTo(Rental::class);
     }
 
     public function vehicle()

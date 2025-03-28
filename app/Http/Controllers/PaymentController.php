@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
-use App\Models\Rental;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PaymentController extends Controller
 {
@@ -102,51 +102,60 @@ class PaymentController extends Controller
         $selectedMonth = $request->input('month', $now->format('Y-m'));
         $selectedWeek = $request->input('week', $now->weekOfYear);
 
-        // Define os intervalos de mês e semana
-        $startOfMonth = Carbon::createFromFormat('Y-m', $selectedMonth)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->endOfMonth();
+        // Cria uma chave única para o cache com base em mês e semana
+        $cacheKey = "totals_{$selectedMonth}_week_{$selectedWeek}";
 
-        $startOfWeek = Carbon::now()->setISODate($startOfMonth->year, $selectedWeek)->startOfWeek();
-        $endOfWeek = $startOfWeek->copy()->endOfWeek();
+        // Tenta recuperar os totais da cache; se não existir, calcula e armazena
+        $totals = Cache::remember($cacheKey, 60 * 60 * 24, function () use ($selectedMonth, $selectedWeek, $now) {
+            // Define os intervalos de mês e semana
+            $startOfMonth = Carbon::createFromFormat('Y-m', $selectedMonth)->startOfMonth();
+            $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
-        // Função para filtrar pagamentos por status de locação
-        $getPaymentsByStatus = function ($statusQuery) {
-            return Payment::whereHas('rental', function ($query) use ($statusQuery) {
-                $query->whereNull('finished_at');
-                $statusQuery($query);
-            });
-        };
+            $startOfWeek = Carbon::now()->setISODate($startOfMonth->year, $selectedWeek)->startOfWeek(Carbon::SUNDAY);
+            $endOfWeek = $startOfWeek->copy()->endOfWeek(Carbon::SATURDAY);
 
-        // Filtros por categoria de aluguel
-        $filters = [
-            'em_andamento' => fn($q) => $q->whereNull('finished_at'),
-        ];
+            // Função para filtrar pagamentos por status de locação
+            $getPaymentsByStatus = function ($statusQuery) {
+                return Payment::whereHas('rental', function ($query) use ($statusQuery) {
+                    $query->whereNull('finished_at');
+                    $statusQuery($query);
+                });
+            };
 
-        // Calculando os totais por categoria
-        $totals = [];
-        foreach ($filters as $status => $statusQuery) {
-            $totals[$status] = [
-                'total' => [
-                    'received' => $getPaymentsByStatus($statusQuery)->whereNotNull('paid_in')->sum('cost'),
-                    'not_received' => $getPaymentsByStatus($statusQuery)->whereNull('paid_in')->sum('cost'),
-                ],
-                'month' => [
-                    'received' => $getPaymentsByStatus($statusQuery)->whereNotNull('paid_in')
-                        ->whereBetween('paid_in', [$startOfMonth, $endOfMonth])->sum('cost'),
-                    'not_received' => $getPaymentsByStatus($statusQuery)->whereNull('paid_in')
-                        ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])->sum('cost'),
-                ],
-                'week' => [
-                    'received' => $getPaymentsByStatus($statusQuery)->whereNotNull('paid_in')
-                        ->whereBetween('paid_in', [$startOfWeek, $endOfWeek])->sum('cost'),
-                    'not_received' => $getPaymentsByStatus($statusQuery)->whereNull('paid_in')
-                        ->whereBetween('payment_date', [$startOfWeek, $endOfWeek])->sum('cost'),
-                ]
+            // Filtros por categoria de aluguel
+            $filters = [
+                'em_andamento' => fn($q) => $q->whereNull('finished_at'),
             ];
-        }
+
+            // Calculando os totais por categoria
+            $totals = [];
+            foreach ($filters as $status => $statusQuery) {
+                $totals[$status] = [
+                    'total' => [
+                        'received' => Payment::where('paid', 1)->sum('cost'),
+                        'not_received' => Payment::where('paid', 0)->sum('cost'),
+                    ],
+                    'month' => [
+                        'received' => $getPaymentsByStatus($statusQuery)->where('paid', 1)
+                            ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])->sum('cost'),
+                        'not_received' => $getPaymentsByStatus($statusQuery)->where('paid', 0)
+                            ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])->sum('cost'),
+                    ],
+                    'week' => [
+                        'received' => $getPaymentsByStatus($statusQuery)->where('paid', 1)
+                            ->whereBetween('payment_date', [$startOfWeek, $endOfWeek])->sum('cost'),
+                        'not_received' => $getPaymentsByStatus($statusQuery)->where('paid', 0)
+                            ->whereBetween('payment_date', [$startOfWeek, $endOfWeek])->sum('cost'),
+                    ]
+                ];
+            }
+
+            return $totals;
+        });
 
         return response()->json($totals);
     }
+
 
     public function getWeeks(Request $request)
     {
@@ -156,23 +165,32 @@ class PaymentController extends Controller
             return response()->json([]);
         }
 
-        $startOfMonth = Carbon::createFromFormat('Y-m', $selectedMonth)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->endOfMonth();
+        // Cria uma chave única para o cache com base no mês selecionado
+        $cacheKey = "weeks_{$selectedMonth}";
 
-        $weeks = [];
-        $currentDate = $startOfMonth->copy();
+        // Tenta recuperar as semanas da cache; se não existir, calcula e armazena
+        $weeks = Cache::remember($cacheKey, 60 * 60 * 24, function () use ($selectedMonth) {
+            $startOfMonth = Carbon::createFromFormat('Y-m', $selectedMonth)->startOfMonth();
+            $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
-        while ($currentDate->lessThanOrEqualTo($endOfMonth)) {
-            $startOfWeek = $currentDate->copy()->startOfWeek(Carbon::SUNDAY);
-            $endOfWeek = $currentDate->copy()->endOfWeek(Carbon::SATURDAY);
-            if ($startOfWeek->month === $startOfMonth->month) {
-                $weeks[] = [
-                    'week' => $currentDate->weekOfYear,
-                    'range' => 'de ' . $startOfWeek->format('d/m') . ' a ' . $endOfWeek->format('d/m')
-                ];
+            $weeks = [];
+            $currentDate = $startOfMonth->copy();
+
+            while ($currentDate->lessThanOrEqualTo($endOfMonth)) {
+                $startOfWeek = $currentDate->copy()->startOfWeek(Carbon::SUNDAY);
+                $endOfWeek = $currentDate->copy()->endOfWeek(Carbon::SATURDAY);
+
+                if ($startOfWeek->month === $startOfMonth->month) {
+                    $weeks[] = [
+                        'week' => $currentDate->weekOfYear,
+                        'range' => 'de ' . $startOfWeek->format('d/m') . ' a ' . $endOfWeek->format('d/m')
+                    ];
+                }
+                $currentDate->addWeek();
             }
-            $currentDate->addWeek();
-        }
+
+            return $weeks;
+        });
 
         return response()->json($weeks);
     }
@@ -224,10 +242,27 @@ class PaymentController extends Controller
             $payment->paid_in = null;
             $returnMessage = 'Valor não recebido.';
         }
+
         $payment->save();
+
+        // 🔄 Limpar caches específicos
+        $months = Payment::selectRaw("DATE_FORMAT(payment_date, '%Y-%m') as month")
+            ->groupBy('month')
+            ->pluck('month');
+
+        foreach ($months as $month) {
+            for ($week = 1; $week <= 53; $week++) {
+                // Limpa cache de getTotals para cada combinação de mês e semana
+                Cache::forget("totals_{$month}_week_{$week}");
+            }
+
+            // Limpa cache de getWeeks para cada mês
+            Cache::forget("weeks_{$month}");
+        }
 
         return response()->json(['success' => $returnMessage]);
     }
+
 
 
     /**

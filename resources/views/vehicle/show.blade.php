@@ -141,7 +141,7 @@
                         <div class="col mt-0">
                             <label for="observation" class="form-label fw-light">Observação</label>
                             <textarea type="text" class="form-control bg-transparent text-white" id="observation" name="observation" required
-                                rows="3"> {{ old('observation') ? old('observation') : $vehicle->observation }}</textarea>
+                                rows="6"> {{ old('observation') ? old('observation') : $vehicle->observation }}</textarea>
                         </div>
                     </div>
                     <div class="mt-4"><small><strong>Manutenções e revisões:</strong></small></div>
@@ -176,9 +176,9 @@
                         </div>
                         <div class="col-12 mt-2">
                             <small><strong>Última revisão:</strong></small>
-                            @if ($vehicle->latestMaintenance)
-                                <small>{{ date('d/m/Y', strtotime($vehicle->latestMaintenance->date)) }} |
-                                    {{ $vehicle->latestMaintenance->actual_km }}</small>
+                            @if ($vehicle->latestRevision)
+                                <small>{{ date('d/m/Y', strtotime($vehicle->latestRevision->date)) }} |
+                                    {{ $vehicle->latestRevision->actual_km }}</small>
                             @else
                                 <small>N/A</small>
                             @endif
@@ -197,11 +197,13 @@
                             <br><small><strong>Próxima troca de óleo:</strong></small>
                             @php
                                 $oilKmRemaining = $vehicle->next_oil_change - $vehicle->actual_km;
+                                $needChangeOil = $vehicle->next_oil_change <= $vehicle->actual_km;
                             @endphp
                             <small>
                                 <span
-                                    class="@if ($oilKmRemaining < 0) text-danger @else text-success @endif">{{ $oilKmRemaining }}</span>
-                                KM.</small>
+                                    class="@if ($needChangeOil) text-danger @else text-success @endif">{{ $vehicle->next_oil_change }}
+                                    KM (faltam {{ $oilKmRemaining }} KM).</span>
+                            </small>
                         </div>
                     </div>
                     <div class="row g-3 mt-5 mb-5">

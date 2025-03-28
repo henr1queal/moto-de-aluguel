@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('mileage_histories', function (Blueprint $table) {
             $table->id();
             $table->integer('actual_km');
+            $table->date('date');
             $table->foreignUuid('vehicle_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('rental_id')->constrained()->onDelete('cascade');
             $table->text('observation')->nullable();

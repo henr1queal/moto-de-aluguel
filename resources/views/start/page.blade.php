@@ -91,6 +91,25 @@
                 </a>
             </div>
             <div class="col-6 col-lg-3 col-xxl-2 d-flex">
+                <a href="{{ route('maintenance.index') }}"
+                    class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
+                    <div class="row g-0">
+                        <div class="pt-3 pb-2 px-4 text-center">
+                            <div class="row g-0 gap-2">
+                                <img src="{{ asset('assets/svg/wrench.svg') }}" alt=""
+                                    style="width: 30px; height: auto;" class="mx-auto">
+                                <p class="mb-0 fw-light" style="font-size: 16px;">
+                                    Verifique o histórico de peças da moto
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-black py-2 text-center w-100 rounded-bottom-4">
+                        <small>Manutenções</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-lg-3 col-xxl-2 d-flex">
                 <a href="{{ route('user.index') }}"
                     class="rounded-4 menu-item d-flex flex-column justify-content-between w-100 text-decoration-none text-white">
                     <div class="row g-0">
@@ -99,7 +118,7 @@
                                 <img src="{{ asset('assets/svg/profile.svg') }}" alt=""
                                     style="width: 30px; height: auto;" class="mx-auto">
                                 <p class="mb-0 fw-light" style="font-size: 16px;">
-                                    Edite permissões, adicione ou redefina usuários.
+                                    Edite permissões, adicione ou redefina usuários
                                 </p>
                             </div>
                         </div>

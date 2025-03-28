@@ -35,7 +35,7 @@ class ReminderController extends Controller
         ];
 
         // Buscando veículos para trocas de óleo e revisões
-        $vehicles = Vehicle::with(['latestMaintenance', 'latestOilChange'])->whereHas('actualRental')->get();
+        $vehicles = Vehicle::with(['latestRevision', 'latestOilChange'])->whereHas('actualRental')->get();
 
         $oilChanges = [];
         $revisions = [];
@@ -44,7 +44,7 @@ class ReminderController extends Controller
             $actualKm = $vehicle->actual_km;
 
             // Cálculo da revisão
-            $latestMaintenanceKm = $vehicle->latestMaintenance->actual_km ?? $vehicle->first_declared_km;
+            $latestRevisionKm = $vehicle->latestRevision->actual_km ?? $vehicle->first_declared_km;
             $nextMaintenanceKm = $vehicle->next_revision;
             $kmRemainingMaintenance = $nextMaintenanceKm - $actualKm;
 
@@ -91,7 +91,7 @@ class ReminderController extends Controller
         $overduePayments = Payment::whereHas('actualRental')->where('payment_date', '<', $today)->where('paid', 0)->count();
 
         // Buscar veículos para trocas de óleo e revisões
-        $vehicles = Vehicle::with(['latestMaintenance', 'latestOilChange'])->whereHas('actualRental')->get();
+        $vehicles = Vehicle::with(['latestRevision', 'latestOilChange'])->whereHas('actualRental')->get();
 
         $oilChangesCount = 0;
         $revisionsCount = 0;

@@ -53,8 +53,16 @@
         }
 
         .modal-content {
-            max-height: 70dvh;
-            overflow-y: auto;
+            max-height: 70dvh !important;
+            overflow-y: auto !important;
+        }
+
+        @media (max-width: 767px){
+            .menu-text {
+                font-size: 0.688rem;
+            }
+
+
         }
     </style>
     @yield('head')
@@ -74,7 +82,7 @@
                     <img src="{{ asset('assets/svg/home.svg') }}" alt="" class="d-block mx-auto mb-1 h-auto"
                         style="width: 28px;">
                 </div>
-                <small>Home</small>
+                <small class="menu-text">Home</small>
             </a>
 
             <a href="{{ route('vehicle.index') }}" class="col-auto text-center text-white text-decoration-none">
@@ -82,7 +90,7 @@
                     <img src="{{ asset('assets/svg/bike.svg') }}" alt="" class="d-block mx-auto h-auto"
                         style="width: 36px;">
                 </div>
-                <small>Motocicletas</small>
+                <small class="menu-text">Motocicletas</small>
             </a>
 
             <a href="{{ route('rental.index') }}" class="col-auto text-center text-white text-decoration-none">
@@ -90,7 +98,7 @@
                     <img src="{{ asset('assets/svg/book.svg') }}" alt="" class="d-block mx-auto mb-1 img-fluid"
                         style="width: 26px;">
                 </div>
-                <small>Locações</small>
+                <small class="menu-text">Locações</small>
             </a>
             <a href="{{ route('payment.index') }}"
                 class="col-auto text-center text-white text-decoration-none d-none d-md-block">
@@ -98,7 +106,14 @@
                     <img src="{{ asset('assets/svg/money.svg') }}" alt="" class="d-block mx-auto mb-1 img-fluid"
                         style="width: 26px;">
                 </div>
-                <small>Finanças</small>
+                <small class="menu-text">Finanças</small>
+            </a>
+            <a href="{{ route('maintenance.index') }}" class="col-auto text-center text-white text-decoration-none">
+                <div style="height: 36px;" class="d-flex align-items-end position-relative">
+                    <img src="{{ asset('assets/svg/wrench.svg') }}" alt="Manutenções" class="img-fluid mx-auto"
+                        style="width: 28px; height: auto;">
+                </div>
+                <small class="menu-text">Manutenções</small>
             </a>
             <a href="{{ route('notifications') }}" class="col-auto text-center text-white text-decoration-none">
                 <div style="height: 36px;" class="d-flex align-items-end position-relative">
@@ -110,7 +125,7 @@
                         0
                     </span>
                 </div>
-                <small>Lembretes</small>
+                <small class="menu-text">Lembretes</small>
             </a>
         </div>
     </div>

@@ -23,6 +23,7 @@
 
         .vehicle {
             border: 1px solid white;
+            cursor: pointer;
         }
 
         .content {

@@ -13,7 +13,7 @@
             <li><hr class="dropdown-divider"></li>
             <li>
                 <a href="#" class="d-block text-decoration-none text-black">
-                    <img src="{{ asset('assets/svg/chave-inglesa.svg') }}" alt="Icon 2" class="img-fluid mx-auto" style="width: 30px; height: auto;">
+                    <img src="{{ asset('assets/svg/wrench.svg') }}" alt="Icon 2" class="img-fluid mx-auto" style="width: 30px; height: auto;">
                     <small class="d-block" style="font-size: 12px;">Manut.</small>
                 </a>
             </li>

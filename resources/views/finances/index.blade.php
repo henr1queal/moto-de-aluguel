@@ -49,8 +49,8 @@
 
         <!-- Filtro por MÊS -->
         <div class="row mb-5 justify-content-center gap-md-3">
-            <div class="col col-md-auto">
-                <h5>Mensal</h5>
+            <div class="col col-md-auto text-center">
+                <h5>Mês</h5>
                 <select id="monthFilter" class="form-select bg-transparent">
                     @foreach ($months as $month)
                         <option class="text-black" value="{{ $month }}"
@@ -60,8 +60,8 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col col-md-auto">
-                <h5>Semanal</h5>
+            <div class="col col-md-auto text-center">
+                <h5>Semana</h5>
                 <select id="weekFilter" class="form-select bg-transparent"></select>
             </div>
         </div>
@@ -72,9 +72,9 @@
                     <div class="finance-card bg-{{ $key }} rounded-4 p-2" style="border: 1px solid white">
                         <h5 class="finance-title text-center mb-0">Semanal</h5>
                         <hr class="my-2">
-                        <p><strong>Pagos na Semana:</strong> <br><span class="amount text-success"
+                        <p><strong>Pagos na semana selecionada:</strong> <br><span class="amount text-success"
                                 id="receivedWeek{{ ucfirst($key) }}">R$ 0,00</span></p>
-                        <p class="mb-0"><strong>Pendentes na Semana:</strong> <br><span class="amount text-danger"
+                        <p class="mb-0"><strong>Pendentes na semana selecionada:</strong> <br><span class="amount text-danger"
                                 id="notReceivedWeek{{ ucfirst($key) }}">R$ 0,00</span></p>
                     </div>
                 </div>
@@ -82,9 +82,9 @@
                     <div class="finance-card bg-{{ $key }} rounded-4 p-2" style="border: 1px solid white">
                         <h5 class="finance-title text-center mb-0">Mensal</h5>
                         <hr class="my-2">
-                        <p><strong>Pagos no Mês:</strong> <br><span class="amount text-success"
+                        <p><strong>Pagos no mês selecionado:</strong> <br><span class="amount text-success"
                                 id="receivedMonth{{ ucfirst($key) }}">R$ 0,00</span></p>
-                        <p class="mb-0"><strong>Pendentes no Mês:</strong> <br><span class="amount text-danger"
+                        <p class="mb-0"><strong>Pendentes no mês selecionado:</strong> <br><span class="amount text-danger"
                                 id="notReceivedMonth{{ ucfirst($key) }}">R$ 0,00</span></p>
                     </div>
                 </div>
@@ -108,7 +108,7 @@
             </div>
             @foreach ($weekData as $key => $data)
                 <div class="col-12 col-lg text-center">
-                    <div class="border h-100 pb-2 rounded-2" data-bs-toggle="modal" data-bs-target="#detailsModal"
+                    <div class="border h-100 pb-2 rounded-2" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#detailsModal"
                         data-day="{{ $data['day'] }}" data-content="{{ json_encode($data) }}">
                         <div class="bg-primary rounded-top-2">{{ $data['day'] }}</div>
                         <div class="mt-2">
