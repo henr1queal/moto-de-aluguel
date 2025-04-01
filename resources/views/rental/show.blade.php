@@ -644,19 +644,19 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content" style="background-color: rgb(28 28 28)">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="revisaoModalLabel">Manutenção/Troca de óleo</h1>
+                        <h1 class="modal-title fs-5" id="revisaoModalLabel">Revisão</h1>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <small class="text-white"><strong>Histórico de manutenções:</strong></small>
+                                <small class="text-white"><strong>Histórico de revisões:</strong></small>
                             </div>
                             <div class="col text-end"><button class="btn btn-primary btn-sm rounded-3 border-white fs-6"
                                     @disabled($rental->finished_at) data-bs-toggle="modal"
                                     data-bs-target="#criacaoRevisaoModal">Nova
-                                    manutenção</button>
+                                    revisão</button>
                             </div>
                         </div>
                         <div class="row mt-4">
@@ -671,7 +671,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content" style="background-color: rgb(28 28 28)">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="trocaDeOleoModalLabel">Troca de óleo</h1>
+                        <h1 class="modal-title fs-5" id="trocaDeOleoModalLabel">Nova Troca de óleo</h1>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
@@ -702,7 +702,7 @@
                     <form action="{{ route('revision.show', ['vehicle' => $rental->vehicle->id]) }}" method="post">
                         @csrf
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="criacaorevisaoModalLabel">Anexar Manutenção</h1>
+                            <h1 class="modal-title fs-5" id="criacaorevisaoModalLabel">Nova revisão</h1>
                             <button type="button" class="btn-close btn-close-white" data-bs-toggle="modal"
                                 data-bs-target="#revisaoModal"></button>
                         </div>
