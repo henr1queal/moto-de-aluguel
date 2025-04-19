@@ -27,37 +27,35 @@ class RentalController extends Controller
 
         // Cria uma chave única para o cache com base no filtro, pesquisa e usuário
         $cacheKey = "myRentals_{$filter}";
-
         // Cache de 7 dias
         $myRentals = Cache::remember($cacheKey, 60 * 24 * 7, function () use ($search, $filter) {
             // Obtém os aluguéis do usuário autenticado e adiciona o join corretamente
             $query = Auth()->user()->rentals()
-                ->join('vehicles as v', 'rentals.vehicle_id', '=', 'v.id')
-                ->select('rentals.*');
-
+            ->join('vehicles as v', 'rentals.vehicle_id', '=', 'v.id')
+            ->select('rentals.*');
+            
             switch ($filter) {
                 case 'ativos':
                     $query->whereNull('finished_at');
                     break;
-                case 'cancelados':
-                    $query->whereNotNull('stop_date');
-                    break;
-                case 'finalizados':
-                    $query->whereNotNull('finished_at')->whereNull('stop_date');
-                    break;
-            }
-
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('rentals.landlord_name', 'like', '%' . $search . '%')
-                        ->orWhere('v.license_plate', 'like', '%' . $search . '%');
-                });
-            }
-
-            $rentals = $query->orderByRaw('finished_at IS NULL DESC')
-                ->orderBy('finished_at', 'desc')
-                ->paginate(10);
-
+                    case 'cancelados':
+                        $query->whereNotNull('stop_date');
+                        break;
+                        case 'finalizados':
+                            $query->whereNotNull('finished_at')->whereNull('stop_date');
+                            break;
+                        }
+                        
+                        if ($search) {
+                            $query->where(function ($q) use ($search) {
+                                $q->where('rentals.landlord_name', 'like', '%' . $search . '%')
+                                ->orWhere('v.license_plate', 'like', '%' . $search . '%');
+                            });
+                        }
+                        
+                        $rentals = $query->orderByRaw('finished_at IS NULL DESC')
+                        ->orderBy('finished_at', 'desc')
+                        ->get();
             foreach ($rentals as $rental) {
                 if ($rental->finished_at === null) {
                     $rental->has_overdue_payments = $rental->hasOverduePayments();
