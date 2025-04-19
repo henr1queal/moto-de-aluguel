@@ -10,6 +10,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -23,7 +24,6 @@ class RentalController extends Controller
     {
         $search = $request->input('search', '');
         $filter = $request->input('filter', 'ativos'); // Filtro padrão 'ativos'
-        $userId = auth()->id(); // ID do usuário autenticado
 
         // Cria uma chave única para o cache com base no filtro, pesquisa e usuário
         $cacheKey = "myRentals_{$filter}";
@@ -31,31 +31,31 @@ class RentalController extends Controller
         $myRentals = Cache::remember($cacheKey, 60 * 24 * 7, function () use ($search, $filter) {
             // Obtém os aluguéis do usuário autenticado e adiciona o join corretamente
             $query = Auth()->user()->rentals()
-            ->join('vehicles as v', 'rentals.vehicle_id', '=', 'v.id')
-            ->select('rentals.*');
-            
+                ->join('vehicles as v', 'rentals.vehicle_id', '=', 'v.id')
+                ->select('rentals.*');
+
             switch ($filter) {
                 case 'ativos':
                     $query->whereNull('finished_at');
                     break;
-                    case 'cancelados':
-                        $query->whereNotNull('stop_date');
-                        break;
-                        case 'finalizados':
-                            $query->whereNotNull('finished_at')->whereNull('stop_date');
-                            break;
-                        }
-                        
-                        if ($search) {
-                            $query->where(function ($q) use ($search) {
-                                $q->where('rentals.landlord_name', 'like', '%' . $search . '%')
-                                ->orWhere('v.license_plate', 'like', '%' . $search . '%');
-                            });
-                        }
-                        
-                        $rentals = $query->orderByRaw('finished_at IS NULL DESC')
-                        ->orderBy('finished_at', 'desc')
-                        ->get();
+                case 'cancelados':
+                    $query->whereNotNull('stop_date');
+                    break;
+                case 'finalizados':
+                    $query->whereNotNull('finished_at')->whereNull('stop_date');
+                    break;
+            }
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('rentals.landlord_name', 'like', '%' . $search . '%')
+                        ->orWhere('v.license_plate', 'like', '%' . $search . '%');
+                });
+            }
+
+            $rentals = $query->orderByRaw('finished_at IS NULL DESC')
+                ->orderBy('finished_at', 'desc')
+                ->get();
             foreach ($rentals as $rental) {
                 if ($rental->finished_at === null) {
                     $rental->has_overdue_payments = $rental->hasOverduePayments();
@@ -451,16 +451,33 @@ class RentalController extends Controller
             'finish_observation' => 'nullable|string',
         ]);
 
-        $validated['finished_at'] = $validated['stop_date'];
-        if ($rental->payments()->where('paid', 0)->exists()) {
-            $rental->payments()->where('paid', 0)->update(['paid' => 3]);
-        } else {
-            $validated['stop_date'] = null;
+        DB::beginTransaction();
+        try {
+            $validated['finished_at'] = $validated['stop_date'];
+            if ($rental->payments()->where('paid', 0)->exists()) {
+                $rental->payments()->where('paid', 0)->update(['paid' => 3]);
+            } else {
+                $validated['stop_date'] = null;
+            }
+
+            // Lista de filtros usados no método index
+            $filters = ['ativos', 'cancelados', 'finalizados'];
+
+            foreach ($filters as $filter) {
+                $cacheKey = "myRentals_{$filter}";
+                Cache::forget($cacheKey);
+            }
+
+            // Atualiza os dados do aluguel
+            $rental->update($validated);
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Aluguel finalizado com sucesso!');
+        } catch (\Throwable $th) {
+            Log::error('Erro ao finalizar aluguel.', ['error' => $th->getMessage()]);
+            return redirect()->back()->with('error', 'Erro ao finalizar aluguel.');
+            DB::rollBack();
         }
 
-        // Atualiza os dados do aluguel
-        $rental->update($validated);
-
-        return redirect()->back()->with('success', 'Aluguel finalizado com sucesso!');
     }
 }
