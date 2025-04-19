@@ -1676,7 +1676,7 @@
                         <!-- Entrada principal -->
                         <div class="col-12 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
                             <span class="${badgeClass}">${item.count}. ${formattedDate(item.payment_date)} - R$ ${item.cost}</span>
-                                <span class="badge rounded-3 fs-6 ${item.paid == 1 ? 'text-bg-success' : 'text-bg-danger'}">${item.paid == 1 ? 'Pago' : (item.paid === 2 ? 'Não pago' : 'Encerrado')}</span>
+                                <span class="badge rounded-3 fs-6 ${item.paid == 1 ? 'text-bg-success' : 'text-bg-danger'}">${item.paid == 1 ? 'Pago' : (item.paid === 0 ? 'Não pago' : 'Encerrado')}</span>
                             </div>
                         </div>
 
