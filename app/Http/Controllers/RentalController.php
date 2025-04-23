@@ -23,11 +23,12 @@ class RentalController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search', '');
-        $filter = $request->input('filter', 'ativos'); // Filtro padrão 'ativos'
+        $filter = $request->input('filter', 'ativos');
+        $cacheKey = "myRentals_{$filter}_{$search}";
 
-        // Cria uma chave única para o cache com base no filtro, pesquisa e usuário
-        $cacheKey = "myRentals_{$filter}";
-        // Cache de 7 dias
+        // Armazena a chave no grupo
+        Cache::put("myRentals_keys", collect(Cache::get("myRentals_keys", []))->merge([$cacheKey])->unique()->toArray());
+
         $myRentals = Cache::remember($cacheKey, 60 * 24 * 7, function () use ($search, $filter) {
             // Obtém os aluguéis do usuário autenticado e adiciona o join corretamente
             $query = Auth()->user()->rentals()
@@ -460,13 +461,14 @@ class RentalController extends Controller
                 $validated['stop_date'] = null;
             }
 
-            // Lista de filtros usados no método index
-            $filters = ['ativos', 'cancelados', 'finalizados'];
+            $keys = Cache::get("myRentals_keys", []);
 
-            foreach ($filters as $filter) {
-                $cacheKey = "myRentals_{$filter}";
-                Cache::forget($cacheKey);
+            foreach ($keys as $key) {
+                Cache::forget($key);
             }
+
+            // Esvazia o próprio registro de chaves
+            Cache::forget("myRentals_keys");
 
             // Atualiza os dados do aluguel
             $rental->update($validated);
@@ -478,6 +480,5 @@ class RentalController extends Controller
             return redirect()->back()->with('error', 'Erro ao finalizar aluguel.');
             DB::rollBack();
         }
-
     }
 }
